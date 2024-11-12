@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-size: 16px;
+  }
+  body {
+    @apply text-base;
+  }
+}
+
+@keyframes ellipsis {
+    0% {
+        transform: translateY(0px);
+    }
+    25% {
+        transform: translateY(-3px);
+    }
+    50% {
+        transform: translateY(0px);
+    }
+    75% {
+        transform: translateY(3px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.ellipsis-dot {
+    @apply inline-block align-middle mx-0.5 text-xl;
+    animation: ellipsis 1.25s infinite;
+}
+
+.ellipsis-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+.ellipsis-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+.ellipsis-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.custom-button-reset {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+html {
+  overflow-y: scroll;
+}
+
+body {
+  background-color: #111827;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+}
+
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

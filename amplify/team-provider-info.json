@@ -1,0 +1,25 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-jambyte-dev-8625c-authRole",
+      "UnauthRoleArn": "arn:aws:iam::018913975251:role/amplify-jambyte-dev-8625c-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::018913975251:role/amplify-jambyte-dev-8625c-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-jambyte-dev-8625c-deployment",
+      "UnauthRoleName": "amplify-jambyte-dev-8625c-unauthRole",
+      "StackName": "amplify-jambyte-dev-8625c",
+      "StackId": "arn:aws:cloudformation:eu-west-1:018913975251:stack/amplify-jambyte-dev-8625c/95be0970-8016-11ef-bea5-028c292e3267",
+      "AmplifyAppId": "dtbo1yklc1yhk"
+    },
+    "categories": {
+      "auth": {
+        "jambyte7d688e29": {
+          "userPoolId": "eu-west-1_OphuNSlQY",
+          "userPoolName": "jambyteio7b7821a8_userpool_7b7821a8-staging",
+          "webClientId": "2csek951tgp7r9pbntmfnqnpro",
+          "nativeClientId": "694utpe2inin0c93l8vorsu1vg"
+        }
+      }
+    }
+  }
+}
