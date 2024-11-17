@@ -20,7 +20,7 @@ export const Navbar = () => {
   const navigation = useMemo(() => [
     { name: 'Home', href: '/', current: pathname === '/' },
     { name: 'Courses', href: '/courses', current: pathname === '/courses' },
-    { name: 'CV Helper', href: '/cv-helper', current: pathname === '/courses' },
+    { name: 'CV Mentor', href: '/cv-mentor', current: pathname === '/cv-mentor' },
     { name: 'Contact', href: '/contact', current: pathname === '/contact' },
     { name: 'About', href: '/about', current: pathname === '/about' },
   ], [pathname]);

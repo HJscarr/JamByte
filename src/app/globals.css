@@ -5,28 +5,31 @@
 @layer base {
   html {
     font-size: 16px;
+    overflow-y: scroll;
   }
+  
   body {
-    @apply text-base;
+    @apply text-base bg-gray-900;
+    margin: 0;
+    line-height: 1.5;
+    /* Consistent scrollbar hiding across browsers */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  body::-webkit-scrollbar {
+    display: none;
   }
 }
 
+/* Loading animation */
 @keyframes ellipsis {
-    0% {
-        transform: translateY(0px);
-    }
-    25% {
-        transform: translateY(-3px);
-    }
-    50% {
-        transform: translateY(0px);
-    }
-    75% {
-        transform: translateY(3px);
-    }
-    100% {
-        transform: translateY(0px);
-    }
+    0% { transform: translateY(0px); }
+    25% { transform: translateY(-3px); }
+    50% { transform: translateY(0px); }
+    75% { transform: translateY(3px); }
+    100% { transform: translateY(0px); }
 }
 
 .ellipsis-dot {
@@ -34,16 +37,11 @@
     animation: ellipsis 1.25s infinite;
 }
 
-.ellipsis-dot:nth-child(1) {
-  animation-delay: 0ms;
-}
-.ellipsis-dot:nth-child(2) {
-  animation-delay: 150ms;
-}
-.ellipsis-dot:nth-child(3) {
-  animation-delay: 300ms;
-}
+.ellipsis-dot:nth-child(1) { animation-delay: 0ms; }
+.ellipsis-dot:nth-child(2) { animation-delay: 150ms; }
+.ellipsis-dot:nth-child(3) { animation-delay: 300ms; }
 
+/* Button reset */
 .custom-button-reset {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
@@ -54,44 +52,57 @@
   background: transparent;
 }
 
-html {
-  overflow-y: scroll;
+/* Markdown Styling */
+.markdown-content {
+  @apply text-gray-300;
 }
 
-body {
-  background-color: #111827;
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.5;
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  @apply font-bold text-white;
 }
 
-.markdown-body ol {
-  list-style-type: decimal;
+.markdown-content h1 {
+  @apply text-2xl mt-4 mb-2;
 }
 
-body::-webkit-scrollbar {
-  width: 12px;
+.markdown-content h2 {
+  @apply text-xl mt-4 mb-2;
 }
 
-body::-webkit-scrollbar-track {
-  background: transparent;
+.markdown-content h3 {
+  @apply text-lg mt-4 mb-2;
 }
 
-body::-webkit-scrollbar-thumb {
-  background: transparent;
+.markdown-content p {
+  @apply mb-4 leading-relaxed;
 }
 
-body::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.markdown-content ul {
+  @apply list-disc ml-6 mb-4;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-body::-webkit-scrollbar {
-  display: none;
+.markdown-content ol {
+  @apply list-decimal ml-6 mb-4;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+.markdown-content li {
+  @apply mb-2;
+}
+
+.markdown-content code {
+  @apply bg-white bg-opacity-10 px-2 py-1 rounded font-mono;
+}
+
+.markdown-content pre {
+  @apply bg-white bg-opacity-10 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-gray-600 pl-4 ml-0 mb-4 text-gray-400;
 }
