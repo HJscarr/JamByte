@@ -17,7 +17,7 @@ export const HeroVideo: React.FC = () => {
     fluid: true,
     poster: "/img/HeroThumbnail.webp",
     sources: [{
-      src: `https://dz9fq1hlgz4i6.cloudfront.net/Homepage.m3u8`,
+      src: `https://homepage.jambyte.io/Homepage.m3u8`, 
       type: 'application/vnd.apple.mpegurl',
       withCredentials: true
     }],
