@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
-// Dynamically import VideoPlayer to ensure it's only loaded on the client side
 const VideoPlayer = dynamic(() => import('./VideoPlayer'), { ssr: false });
 
 export const HeroVideo: React.FC = () => {
@@ -18,24 +17,43 @@ export const HeroVideo: React.FC = () => {
     fluid: true,
     poster: "/img/HeroThumbnail.webp",
     sources: [{
-      src: `https://homepage.jambyte.io/Homepage.mp4`,
-      type: 'video/mp4',
+      src: `https://dz9fq1hlgz4i6.cloudfront.net/Homepage.m3u8`,
+      type: 'application/vnd.apple.mpegurl',
       withCredentials: true
-    }]
+    }],
+    html5: {
+      hls: {
+        overrideNative: true
+      }
+    }
   };
 
   const handlePlayerReady = (player: any) => {
     playerRef.current = player;
+
     player.on('waiting', () => {
       console.log('player is waiting');
     });
+
     player.on('dispose', () => {
       console.log('player will dispose');
     });
-  };
 
+    // Prevent auto-play
+    player.on('loadstart', () => {
+      player.pause();
+    });
+
+    // Add a click event listener to the play button
+    const playButton = player.el().querySelector('.vjs-big-play-button');
+    if (playButton) {
+      playButton.addEventListener('click', () => {
+        player.play();
+      });
+    }
+  };
+  
   useEffect(() => {
-    // Any client-side only code can go here
     return () => {
       if (playerRef.current) {
         (playerRef.current as any).dispose();
@@ -48,7 +66,7 @@ export const HeroVideo: React.FC = () => {
       <div className="flex-1 p-1 w-full md:w-1/2 md:mr-12" style={{ aspectRatio: '16 / 9' }}>
         <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
       </div>
-
+      
       <div className="flex-1 pt-2 flex flex-col justify-start w-full md:w-1/2 mt-2 md:mt-8">
         <div className="text-center md:text-left md:ml-6">
           <h2 className="text-base font-semibold leading-7 bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text">Discover programming</h2>
