@@ -1,70 +1,29 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
-const VideoPlayer = dynamic(() => import('./VideoPlayer'), { ssr: false });
+const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false });
 
 export const HeroVideo: React.FC = () => {
-  const playerRef = useRef(null);
-
-  const videoJsOptions = {
-    crossOrigin: 'use-credentials',
-    autoplay: false,
-    controls: true,
-    responsive: true,
-    fluid: true,
-    poster: "/img/HeroThumbnail.webp",
-    sources: [{
-      src: `https://homepage.jambyte.io/Homepage.m3u8`, 
-      type: 'application/vnd.apple.mpegurl',
-      withCredentials: true
-    }],
-    html5: {
-      hls: {
-        overrideNative: true
-      }
-    }
-  };
-
-  const handlePlayerReady = (player: any) => {
-    playerRef.current = player;
-
-    player.on('waiting', () => {
-      console.log('player is waiting');
-    });
-
-    player.on('dispose', () => {
-      console.log('player will dispose');
-    });
-
-    // Prevent auto-play
-    player.on('loadstart', () => {
-      player.pause();
-    });
-
-    // Add a click event listener to the play button
-    const playButton = player.el().querySelector('.vjs-big-play-button');
-    if (playButton) {
-      playButton.addEventListener('click', () => {
-        player.play();
-      });
-    }
-  };
-  
-  useEffect(() => {
-    return () => {
-      if (playerRef.current) {
-        (playerRef.current as any).dispose();
-      }
-    };
-  }, []);
-
   return (
     <div className="flex flex-col md:flex-row items-center bg-gray-900 w-full px-6 md:w-11/12 sm:px-20 mt-32 md:mt-0 h-auto md:h-screen">
       <div className="flex-1 p-1 w-full md:w-1/2 md:mr-12" style={{ aspectRatio: '16 / 9' }}>
-        <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
+        <MuxPlayer
+          streamType="on-demand"
+          playbackId="KJJLyIgjLB7E3lgisx8sVVDmGkkJw2grKUQ1Enxhtd8"
+          poster="/img/HeroThumbnail.webp"
+          autoPlay={false}
+          primaryColor="#FFFFFF"
+          secondaryColor="#000000"
+          style={{
+            height: '100%',
+            width: '100%',
+            maxWidth: '100%',
+            borderRadius: '4px',
+          }}
+        />
       </div>
       
       <div className="flex-1 pt-2 flex flex-col justify-start w-full md:w-1/2 mt-2 md:mt-8">
