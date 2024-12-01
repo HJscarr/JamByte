@@ -41,7 +41,12 @@ const Lesson: React.FC = () => {
     }
   };
 
-  const fetchMuxToken = async (playbackId: string, email: string) => {
+  const fetchMuxToken = async (playbackId: string) => {
+    if (!user?.attributes?.email) {
+      console.error("No user email available");
+      return null;
+    }
+
     try {
       const response = await fetch('https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production', {
         method: 'POST',
@@ -50,7 +55,7 @@ const Lesson: React.FC = () => {
         },
         body: JSON.stringify({
           playback_id: playbackId,
-          email: email
+          email: user.attributes.email
         })
       });
       
@@ -83,22 +88,6 @@ const Lesson: React.FC = () => {
       console.error("Error fetching user progress:", error);
     }
   };
-
-  useEffect(() => {
-    const retrieveLessons = async () => {
-      const fetchedLessons = await fetchLessons();
-      setLessons(fetchedLessons);
-      setIsDataLoaded(true);
-    };
-
-    retrieveLessons();
-  }, []);
-
-  useEffect(() => {
-    if (user && user.attributes.email) {
-      fetchUserProgress(user.attributes.email, "Pi-Guard");
-    }
-  }, [user]);
 
   const sendProgressUpdate = async (time: number) => {
     if (!user?.attributes?.email || !currentLesson.length) return;
@@ -181,13 +170,33 @@ const Lesson: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const retrieveLessons = async () => {
+      const fetchedLessons = await fetchLessons();
+      setLessons(fetchedLessons);
+      setIsDataLoaded(true);
+    };
+
+    retrieveLessons();
+  }, []);
+
+  useEffect(() => {
+    if (user && user.attributes.email) {
+      fetchUserProgress(user.attributes.email, "Pi-Guard");
+    }
+  }, [user]);
+
+  useEffect(() => {
     const getMuxToken = async () => {
-      if (currentLesson?.muxid && user?.attributes?.email) {
-        const token = await fetchMuxToken(currentLesson.muxid, user.attributes.email);
+      // Reset token when lesson changes
+      setMuxToken(null);
+      
+      // Only fetch token if current lesson exists and is private
+      if (currentLesson?.muxid && currentLesson?.private) {
+        const token = await fetchMuxToken(currentLesson.muxid);
         setMuxToken(token);
       }
     };
-  
+
     getMuxToken();
   }, [currentLesson, user]);
 
@@ -215,23 +224,27 @@ const Lesson: React.FC = () => {
           {isDataLoaded && cookiesSet ? (
             <>
               <div className="w-full" style={{ aspectRatio: '16/9' }}>
-              <MuxPlayer
-                streamType="on-demand"
-                playbackId={currentLesson.muxid}
-                tokens={
-                  muxToken ? { playback: muxToken } : undefined
-                }
-                autoPlay={false}
-                onTimeUpdate={handleTimeUpdate}
-                onEnded={autoAdvanceToNextVideo}
-                primaryColor="#FFFFFF"
-                secondaryColor="#000000"
-                style={{
-                  height: '100%',
-                  width: '100%',
-                  maxWidth: '100%',
-                }}
-              />
+                {currentLesson?.muxid && (
+                  <MuxPlayer
+                    streamType="on-demand"
+                    playbackId={currentLesson.muxid}
+                    tokens={
+                      currentLesson.private && muxToken 
+                        ? { playback: muxToken } 
+                        : undefined
+                    }
+                    autoPlay={false}
+                    onTimeUpdate={handleTimeUpdate}
+                    onEnded={autoAdvanceToNextVideo}
+                    primaryColor="#FFFFFF"
+                    secondaryColor="#000000"
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      maxWidth: '100%',
+                    }}
+                  />
+                )}
               </div>
               {countdown > 0 && (
                 <div className="absolute z-30 flex flex-col items-center justify-center top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-50 rounded-lg p-4">
