@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import ChatBot from '../../components/ChatBot';
 import LessonDesc from '../../components/LessonDesc';
@@ -28,7 +28,7 @@ const Lesson: React.FC = () => {
   const [showEndOfSeriesModal, setShowEndOfSeriesModal] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(0);
   const [open, setOpen] = useState(false);
-  const [muxToken, setMuxToken] = useState<string | null>(null);
+  const [privateVideoToken, setPrivateVideoToken] = useState<string | null>(null);
 
   const fetchLessons = async (): Promise<any[]> => {
     try {
@@ -41,22 +41,18 @@ const Lesson: React.FC = () => {
     }
   };
 
-  const fetchMuxToken = async (playbackId: string) => {
+  const fetchPrivateVideoToken = async () => {
     if (!user?.attributes?.email) {
       console.error("No user email available");
       return null;
     }
 
     try {
-      const response = await fetch('https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production', {
-        method: 'POST',
+      const response = await fetch(`https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.attributes.email)}`, {        
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          playback_id: playbackId,
-          email: user.attributes.email
-        })
+        }
       });
       
       if (!response.ok) {
@@ -64,11 +60,22 @@ const Lesson: React.FC = () => {
       }
       
       const { token } = await response.json();
+      console.log("Token recieved: " + token);
       return token;
     } catch (error) {
       console.error("Error fetching Mux token:", error);
       return null;
     }
+  };
+
+  const getVideoUrl = (lesson: any) => {
+    if (!lesson?.muxid) return null;
+
+    if (lesson.private && privateVideoToken) {
+      return `https://stream.mux.com/${lesson.muxid}.m3u8?token=${privateVideoToken}`;
+    }
+    
+    return `https://stream.mux.com/${lesson.muxid}.m3u8`;
   };
 
   const preprocessProgress = (data: ProgressData[]): number[] => {
@@ -169,15 +176,23 @@ const Lesson: React.FC = () => {
     setCurrentIndex(index);
   }, []);
 
+  // Initialize lessons and fetch private video token
   useEffect(() => {
-    const retrieveLessons = async () => {
+    const initializeData = async () => {
       const fetchedLessons = await fetchLessons();
       setLessons(fetchedLessons);
+      
+      // If there are any private videos, fetch the token
+      if (fetchedLessons.some((lesson: any) => lesson.private)) {
+        const token = await fetchPrivateVideoToken();
+        setPrivateVideoToken(token);
+      }
+      
       setIsDataLoaded(true);
     };
 
-    retrieveLessons();
-  }, []);
+    initializeData();
+  }, [user]);
 
   useEffect(() => {
     if (user && user.attributes.email) {
@@ -185,20 +200,7 @@ const Lesson: React.FC = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    const getMuxToken = async () => {
-      // Reset token when lesson changes
-      setMuxToken(null);
-      
-      // Only fetch token if current lesson exists and is private
-      if (currentLesson?.muxid && currentLesson?.private) {
-        const token = await fetchMuxToken(currentLesson.muxid);
-        setMuxToken(token);
-      }
-    };
-
-    getMuxToken();
-  }, [currentLesson, user]);
+  const videoUrl = getVideoUrl(currentLesson);
 
   return (
     <div>
@@ -227,12 +229,8 @@ const Lesson: React.FC = () => {
                 {currentLesson?.muxid && (
                   <MuxPlayer
                     streamType="on-demand"
-                    playbackId={currentLesson.muxid}
-                    tokens={
-                      currentLesson.private && muxToken 
-                        ? { playback: muxToken } 
-                        : undefined
-                    }
+                    playbackId={!currentLesson.private ? currentLesson.muxid : undefined}
+                    src={currentLesson.private ? videoUrl : undefined}
                     autoPlay={false}
                     onTimeUpdate={handleTimeUpdate}
                     onEnded={autoAdvanceToNextVideo}
