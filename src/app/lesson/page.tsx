@@ -28,7 +28,7 @@ const Lesson: React.FC = () => {
   const [showEndOfSeriesModal, setShowEndOfSeriesModal] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(0);
   const [open, setOpen] = useState(false);
-  const [privateVideoToken, setPrivateVideoToken] = useState<string | null>(null);
+  const [privateVideoTokens, setPrivateVideoTokens] = useState<Record<string, string>>({});
 
   const fetchLessons = async (): Promise<any[]> => {
     try {
@@ -41,26 +41,28 @@ const Lesson: React.FC = () => {
     }
   };
 
-  const fetchPrivateVideoToken = async () => {
+  const fetchPrivateVideoToken = async (playbackId: string) => {
     if (!user?.attributes?.email) {
       console.error("No user email available");
       return null;
     }
 
     try {
-      const response = await fetch(`https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.attributes.email)}`, {        
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.attributes.email)}&playback_id=${playbackId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
       
       if (!response.ok) {
         throw new Error('Failed to fetch Mux token');
       }
       
       const { token } = await response.json();
-      console.log("Token recieved: " + token);
       return token;
     } catch (error) {
       console.error("Error fetching Mux token:", error);
@@ -68,11 +70,25 @@ const Lesson: React.FC = () => {
     }
   };
 
+  const fetchAllPrivateTokens = async (lessons: any[]) => {
+    const privateVideos = lessons.filter(lesson => lesson.private);
+    const tokens: Record<string, string> = {};
+
+    for (const lesson of privateVideos) {
+      const token = await fetchPrivateVideoToken(lesson.muxid);
+      if (token) {
+        tokens[lesson.muxid] = token;
+      }
+    }
+
+    setPrivateVideoTokens(tokens);
+  };
+
   const getVideoUrl = (lesson: any) => {
     if (!lesson?.muxid) return null;
 
-    if (lesson.private && privateVideoToken) {
-      return `https://stream.mux.com/${lesson.muxid}.m3u8?token=${privateVideoToken}`;
+    if (lesson.private && privateVideoTokens[lesson.muxid]) {
+      return `https://stream.mux.com/${lesson.muxid}.m3u8?token=${privateVideoTokens[lesson.muxid]}`;
     }
     
     return `https://stream.mux.com/${lesson.muxid}.m3u8`;
@@ -176,16 +192,14 @@ const Lesson: React.FC = () => {
     setCurrentIndex(index);
   }, []);
 
-  // Initialize lessons and fetch private video token
+  // Initialize lessons and fetch private video tokens
   useEffect(() => {
     const initializeData = async () => {
       const fetchedLessons = await fetchLessons();
       setLessons(fetchedLessons);
       
-      // If there are any private videos, fetch the token
       if (fetchedLessons.some((lesson: any) => lesson.private)) {
-        const token = await fetchPrivateVideoToken();
-        setPrivateVideoToken(token);
+        await fetchAllPrivateTokens(fetchedLessons);
       }
       
       setIsDataLoaded(true);
