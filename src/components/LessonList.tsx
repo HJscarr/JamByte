@@ -16,6 +16,7 @@ interface LessonListProps {
   setSelectedLesson: (index: number) => void;
   currentIndex: number;
   progress: { [key: number]: number };
+  thumbnails: Record<string, string>;
 }
 
 export const LessonList: React.FC<LessonListProps> = ({ open, setOpen, lessons, setSelectedLesson, currentIndex, progress }) => {

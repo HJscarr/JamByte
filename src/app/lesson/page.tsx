@@ -29,6 +29,7 @@ const Lesson: React.FC = () => {
   const [lastUpdateTime, setLastUpdateTime] = useState(0);
   const [open, setOpen] = useState(false);
   const [privateVideoTokens, setPrivateVideoTokens] = useState<Record<string, string>>({});
+  const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 
   const fetchLessons = async (): Promise<any[]> => {
     try {
@@ -70,18 +71,45 @@ const Lesson: React.FC = () => {
     }
   };
 
+  const fetchThumbnail = async (lesson: any) => {
+    if (!lesson?.muxid) return null;
+
+    if (lesson.private) {
+      const token = privateVideoTokens[lesson.muxid];
+      if (!token) return null;
+      return `https://image.mux.com/${lesson.muxid}/thumbnail.png?token=${token}&width=640&height=360&time=3`;
+    }
+
+    return `https://image.mux.com/${lesson.muxid}/thumbnail.png?width=640&height=360&time=3`;
+  };
+
   const fetchAllPrivateTokens = async (lessons: any[]) => {
     const privateVideos = lessons.filter(lesson => lesson.private);
     const tokens: Record<string, string> = {};
+    const thumbnailUrls: Record<string, string> = {};
 
     for (const lesson of privateVideos) {
       const token = await fetchPrivateVideoToken(lesson.muxid);
       if (token) {
         tokens[lesson.muxid] = token;
+        const thumbnail = await fetchThumbnail({ ...lesson, private: true });
+        if (thumbnail) {
+          thumbnailUrls[lesson.muxid] = thumbnail;
+        }
+      }
+    }
+
+    // Fetch thumbnails for public videos
+    const publicVideos = lessons.filter(lesson => !lesson.private);
+    for (const lesson of publicVideos) {
+      const thumbnail = await fetchThumbnail(lesson);
+      if (thumbnail) {
+        thumbnailUrls[lesson.muxid] = thumbnail;
       }
     }
 
     setPrivateVideoTokens(tokens);
+    setThumbnails(thumbnailUrls);
   };
 
   const getVideoUrl = (lesson: any) => {
@@ -197,11 +225,7 @@ const Lesson: React.FC = () => {
     const initializeData = async () => {
       const fetchedLessons = await fetchLessons();
       setLessons(fetchedLessons);
-      
-      if (fetchedLessons.some((lesson: any) => lesson.private)) {
-        await fetchAllPrivateTokens(fetchedLessons);
-      }
-      
+      await fetchAllPrivateTokens(fetchedLessons);
       setIsDataLoaded(true);
     };
 
@@ -224,7 +248,8 @@ const Lesson: React.FC = () => {
         lessons={lessons} 
         setSelectedLesson={setSelectedLesson} 
         currentIndex={currentIndex} 
-        progress={progressData} 
+        progress={progressData}
+        thumbnails={thumbnails}
       />
       
       <div className="container mx-auto flex mb-10 relative w-9/12 sm:w-3/5 mt-[-45px]">
@@ -241,21 +266,32 @@ const Lesson: React.FC = () => {
             <>
               <div className="w-full" style={{ aspectRatio: '16/9' }}>
                 {currentLesson?.muxid && (
-                  <MuxPlayer
-                    streamType="on-demand"
-                    playbackId={!currentLesson.private ? currentLesson.muxid : undefined}
-                    src={currentLesson.private ? videoUrl : undefined}
-                    autoPlay={false}
-                    onTimeUpdate={handleTimeUpdate}
-                    onEnded={autoAdvanceToNextVideo}
-                    primaryColor="#FFFFFF"
-                    secondaryColor="#000000"
-                    style={{
-                      height: '100%',
-                      width: '100%',
-                      maxWidth: '100%',
-                    }}
-                  />
+                  <>
+                    {!videoUrl ? (
+                      <img 
+                        src={thumbnails[currentLesson.muxid]} 
+                        alt={currentLesson.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <MuxPlayer
+                        streamType="on-demand"
+                        playbackId={!currentLesson.private ? currentLesson.muxid : undefined}
+                        src={currentLesson.private ? videoUrl : undefined}
+                        autoPlay={false}
+                        onTimeUpdate={handleTimeUpdate}
+                        onEnded={autoAdvanceToNextVideo}
+                        primaryColor="#FFFFFF"
+                        secondaryColor="#000000"
+                        poster={thumbnails[currentLesson.muxid]}
+                        style={{
+                          height: '100%',
+                          width: '100%',
+                          maxWidth: '100%',
+                        }}
+                      />
+                    )}
+                  </>
                 )}
               </div>
               {countdown > 0 && (
