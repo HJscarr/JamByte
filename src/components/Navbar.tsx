@@ -77,13 +77,13 @@ export const Navbar = () => {
   
             cookies.forEach(cookie => {
               const fullCookie = `${cookie}; ${cookieOptions}`;
-              console.log('Setting cookie:', fullCookie);
+              // console.log('Setting cookie:', fullCookie);
               document.cookie = fullCookie;
             });
   
             // Verify immediately after setting
             const currentCookies = document.cookie;
-            console.log('Current cookies after setting:', currentCookies);
+            // console.log('Current cookies after setting:', currentCookies);
   
             // Check if cookies were actually set
             const policyCookie = document.cookie.match(/CloudFront-Policy=([^;]*)/);
