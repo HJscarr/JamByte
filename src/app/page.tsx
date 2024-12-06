@@ -139,7 +139,7 @@ export default function HomePage() {
         {heroVisible && <HeroVideo />}
       </div>
 
-      <div className="mb-24">
+      <div className="mb-12 sm:mb-24 mt-12 pt-12 sm:mt-8">
         <Photos />
       </div>
 

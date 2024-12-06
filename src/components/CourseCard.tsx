@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCartIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
 import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import getStripe from '@/lib/GetStripe';
 import { useUser } from '@/context/UserContext';
@@ -23,7 +23,15 @@ interface CourseProps {
   status?: string;
 }
 
-const CourseCard: React.FC<CourseProps> = ({ title, description, imageUrl, mobileImageUrl, details, showActions=false, productID, status }) => {
+const CourseCard: React.FC<CourseProps> = ({ 
+  title, 
+  description, 
+  imageUrl, 
+  details, 
+  showActions = false, 
+  productID, 
+  status 
+}) => {
   const { user, setUser } = useUser();
   const [hasBought, setHasBought] = useState<boolean>(false);
   const [cookiesSet] = useCookiesContext();
@@ -126,128 +134,108 @@ const CourseCard: React.FC<CourseProps> = ({ title, description, imageUrl, mobil
     }
   };
 
+  const getCourseRoute = (courseTitle: string) => {
+    switch (courseTitle) {
+      case "Pi-Guard":
+        return "/Pi-Guard";
+      case "Rover":
+        return "/Rover";
+      case "Link":
+        return "/Link";
+      default:
+        return "/courses";
+    }
+  };
+
   return (
-    <>
-      <div className="hidden sm:block relative flex flex-col p-4 border border-gray-600 rounded-md shadow-sm hover:shadow-lg transition flex-grow sm:h-500 h-96"
-        style={{
-          backgroundImage: `url(${imageUrl})`,
-          backgroundSize: '95% auto',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {showActions &&
-          <Link href="/Pi-Guard" className="absolute inset-0" style={{
-            background: 'transparent',
-            zIndex: 0,
-          }} onClick={(e) => e.stopPropagation()}></Link>
-        } 
-        <div className="relative text-center">
+    <div 
+      className="relative flex flex-col border border-gray-600 rounded-md shadow-sm hover:shadow-lg transition-all duration-300 w-full h-full max-w-md mx-auto transform hover:scale-105 cursor-pointer"
+      onClick={() => window.location.href = getCourseRoute(title)}
+    >
+      <div className="relative flex flex-col items-center p-2 h-full">
+        <div className="pt-4 w-full">
+          <Image 
+            src={imageUrl} 
+            alt={title} 
+            width={500} 
+            height={300} 
+            className="w-full rounded-md mb-4" 
+          />
+        </div>
+
+        <div className="text-center mb-4">
           {showActions ? (
-            <Link href="/Pi-Guard" className="pt-12 text-xl sm:text-3xl font-bold text-white block">{title}</Link>
+            <span className="text-2xl font-bold text-white hover:text-secondary">
+              {title}
+            </span>
           ) : (
-            <div className="pt-12 text-xl sm:text-3xl font-bold text-white">{title}</div>
+            <h2 className="text-2xl font-bold text-white">{title}</h2>
           )}
-          <p className="mt-1 bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text">{description}</p>
-          {details && (
-            <p className="mt-1 text-gray-300 sm:mb-16 md:mb-24 text-xs sm:text-base w-full sm:w-2/5  mx-auto" style={{ whiteSpace: 'pre-line' }}>
-              {details}
-            </p>
-          )}
+          <p className="mt-2 bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text">
+            {description}
+          </p>
         </div>
-        {showActions && (
-          <div className="px-2 sm:p-4 mt-auto z-15">
-            <div className="relative flex justify-center mt-12 mb-2">
-              {
-                hasBought || cookiesSet ? (
-                  <Link href="/lesson">
-                    <button
-                      className="flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 sm:px-10 py-3 whitespace-nowrap text-sm sm:text-base font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 z-15"
-                    >
-                      Start&nbsp;Learning
-                      <RocketLaunchIcon className="ml-2 h-5 w-5 text-white" />
-                    </button>
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleCheckout}
-                    className="flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 sm:px-10 py-2 sm:py-3 whitespace-nowrap text-sm sm:text-base font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 z-15"
-                  >
-                    Buy&nbsp;now
-                    <ShoppingCartIcon className="ml-2 h-5 w-5 text-white" />
-                  </button>
-                )
-              }
-            </div>
-            <div className="flex justify-center">
-              <Link href='/Pi-Guard'>
-                <button
-                  type="button"
-                  className="flex items-right justify-center rounded-md border border-transparent px-8 sm:px-16 py-2 sm:py-3 text-sm sm:text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 z-10"
-                >
-                  Learn more
-                </button>
-              </Link>
-            </div>
-            <div className="flex justify-center">
-              {status === 'Available' && productID && (
-                <div className="px-8 sm:px-16 text-sm sm:text-base font-medium text-white">
-                  <StockChecker productId={productID} />
-                </div>
-              )}
-            </div>
-          </div>
+
+        {details && (
+          <p className="text-gray-300 text-sm mb-6 text-center px-4 sm:px-12">
+            {details}
+          </p>
         )}
-      </div>
-      <div className="sm:hidden relative flex flex-col border border-gray-600 rounded-md shadow-sm hover:shadow-lg transition flex-grow h-500">
-        <div className="absolute z-0 mt-2 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12">
-          <div className="relative z-10 text-center">
-            <Link href="/Pi-Guard" className="text-xl sm:text-3xl font-bold text-white">{title}</Link>
-            <p className="bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text">{description}</p>
-            <p className="text-gray-300 text-xs sm:text-base">
-            <br />Create a home security device that records
-              <br />audio and video when motion is detected!
-            </p>
-          </div>
-          <Link href="/Pi-Guard">
-            <Image src={mobileImageUrl} alt="Pi-Guard" width={500} height={300} className="w-full mx-auto my-4" style={{ maxWidth: '100%', height: 'auto' }} />
-          </Link>
-          <div className="px-2 sm:p-4 mt-auto">
-            <div className="flex justify-center mt-4 mb-2">
-              {
-                hasBought || cookiesSet ? (
-                  <Link href="/lesson">
-                    <button
-                      className="flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 py-3 whitespace-nowrap text-sm sm:text-base font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Start&nbsp;Learning
-                      <RocketLaunchIcon className="ml-2 h-5 w-5 text-white" />
-                    </button>
-                  </Link>
-                ) : (
-                  <CheckoutHandler
-                    priceID="price_1OkwbGGAlR94zWojhzJ8TgdB"
-                    successUrl={successUrl}
-                    cancelUrl={cancelUrl}
-                  />
-                )
-              }
-            </div>
-            <div className="flex justify-center">
-              <Link href='/Pi-Guard'>
+
+        <div className="relative w-full mt-auto space-y-4 px-12 sm:px-16">
+          {showActions ? (
+            <>
+              {hasBought || cookiesSet ? (
+                <Link href="/lesson" className="block w-full">
+                  <button 
+                    onClick={(e) => e.stopPropagation()} 
+                    className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-4 sm:px-6 py-3 text-sm sm:text-base font-medium text-white transition-all duration-300 whitespace-nowrap"
+                  >
+                    Start Learning
+                    <RocketLaunchIcon className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  </button>
+                </Link>
+              ) : (
                 <button
-                  type="button"
-                  className="flex items-right justify-center rounded-md border border-transparent px-8 sm:px-16 py-2 sm:py-3 text-sm sm:text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCheckout();
+                  }}
+                  className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 py-3 text-base font-medium text-white transition-all duration-300"
                 >
-                  Learn more
+                  Buy now
+                  <ShoppingCartIcon className="ml-2 h-5 w-5" />
                 </button>
-              </Link>
-            </div>
+              )}
+            </>
+          ) : (
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 py-3 text-base font-medium text-white transition-all duration-300"
+            >
+              Get Notified
+              <BellIcon className="ml-2 h-5 w-5" />
+            </button>
+          )}
+
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = getCourseRoute(title);
+            }} 
+            className="w-full rounded-md border border-transparent px-6 py-3 text-base font-medium text-white hover:text-secondary transition-colors duration-300"
+          >
+            Learn more
+          </button>
+
+          <div className="text-center text-white pb-2">
+            {showActions && status === 'Available' && productID && (
+              <StockChecker productId={productID} />
+            )}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

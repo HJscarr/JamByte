@@ -134,7 +134,7 @@ const Hero: React.FC = () => {
           </div>
         }>
           {isMobile ? (
-            <div className="w-full mt-[-140px]"> {/* Added margin-top for mobile only */}
+            <div className="w-full mt-[-150px]"> {/* Added margin-top for mobile only */}
               <MobileHeroIllustration />
             </div>
           ) : (
