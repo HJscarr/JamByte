@@ -14,7 +14,7 @@ import { AmplifyUser, UserAttributes } from '../data/user';
 
 const product = {
   name: "Pi-Guard",
-  price: "£149",
+  price: "£74",
   href: "#",
   images: [
     {
@@ -202,7 +202,7 @@ export const BoxAndDesc = () => {
                   </>
                 ) : (
                   <CheckoutHandler
-                    priceID="price_1OkwbGGAlR94zWojhzJ8TgdB"
+                    priceID="price_1QVtp8GAlR94zWojDJgWQxD3"
                     successUrl={successUrl}
                     cancelUrl="https://jambyte.io/Pi-Guard"
                   />

@@ -40,7 +40,7 @@ const ExpandableWindow: React.FC = () => {
                     </div>
                     <div className="p-4 overflow-y-auto">
                         <p className="mb-4">
-                            Sign up with us to get a <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">£50 off discount</span> on your first order!
+                            Sign up with us to get a <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">£20 off discount</span> on your first order!
                         </p>
                         <button
                             className={buttonClass}

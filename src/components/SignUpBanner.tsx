@@ -34,11 +34,11 @@ const SignUpBanner: React.FC = () => {
                 <div className="flex items-center gap-x-2 truncate flex-grow justify-start sm:justify-center">
                     <p className="text-xs sm:text-sm leading-6 text-gray-900 whitespace-nowrap overflow-visible sm:overflow-hidden sm:text-center sm:max-w-md">
                         <span className="block sm:hidden">
-                            <strong className="font-semibold">JamByte.io - </strong> <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">£50 off </span>  your first order!
+                            <strong className="font-semibold">JamByte.io - </strong> <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">£20 off </span>  your first order!
                         </span>
                         <span className="hidden sm:block">
                             <strong className="font-semibold">JamByte.io - </strong>
-                            Sign up to get a <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">£50 off discount</span> on your first order!
+                            Sign up to get a <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">£20 off discount</span> on your first order!
                         </span>
                     </p>
                 </div>

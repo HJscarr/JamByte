@@ -1,15 +1,15 @@
 {
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-jambyte-dev-8625c-authRole",
-      "UnauthRoleArn": "arn:aws:iam::018913975251:role/amplify-jambyte-dev-8625c-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::018913975251:role/amplify-jambyte-dev-8625c-authRole",
+      "AuthRoleName": "amplify-jambyte-dev-0162c-authRole",
+      "UnauthRoleArn": "arn:aws:iam::018913975251:role/amplify-jambyte-dev-0162c-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::018913975251:role/amplify-jambyte-dev-0162c-authRole",
       "Region": "eu-west-1",
-      "DeploymentBucketName": "amplify-jambyte-dev-8625c-deployment",
-      "UnauthRoleName": "amplify-jambyte-dev-8625c-unauthRole",
-      "StackName": "amplify-jambyte-dev-8625c",
-      "StackId": "arn:aws:cloudformation:eu-west-1:018913975251:stack/amplify-jambyte-dev-8625c/95be0970-8016-11ef-bea5-028c292e3267",
-      "AmplifyAppId": "dtbo1yklc1yhk"
+      "DeploymentBucketName": "amplify-jambyte-dev-0162c-deployment",
+      "UnauthRoleName": "amplify-jambyte-dev-0162c-unauthRole",
+      "StackName": "amplify-jambyte-dev-0162c",
+      "StackId": "arn:aws:cloudformation:eu-west-1:018913975251:stack/amplify-jambyte-dev-0162c/0227bd00-9173-11ef-a43d-066be52832b7",
+      "AmplifyAppId": "d1hi03d2iufpbn"
     },
     "categories": {
       "auth": {
