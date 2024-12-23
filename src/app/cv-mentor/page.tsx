@@ -15,7 +15,46 @@ export default function CVHelperPage() {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
 
-  const connectWebSocket = (file: File) => {
+  const handleWebSocketMessage = useCallback((event: MessageEvent) => {
+    if (!event.data || event.data.trim() === '') {
+      console.log('Received empty message, skipping processing');
+      return;
+    }
+
+    try {
+      console.log('Raw message received:', event.data);
+      const data = JSON.parse(event.data);
+      console.log('Received message:', data);
+      
+      switch (data.type) {
+        case 'start':
+          setLoading(true);
+          setAnalysis(prev => [...prev, data.message]);
+          break;
+        case 'chunk_received':
+          console.log(`Chunk ${data.chunkIndex} of ${data.totalChunks} received`);
+          if (data.isComplete) {
+            console.log('All chunks received, waiting for analysis...');
+          }
+          break;
+        case 'complete':
+          setLoading(false);
+          setAnalysis(prev => [...prev, data.content]);
+          break;
+        case 'error':
+          setError(data.message);
+          setLoading(false);
+          break;
+        default:
+          console.warn('Unknown message type:', data.type);
+      }
+    } catch (err) {
+      console.error('Error processing message:', err);
+      console.warn('Raw message received:', event.data);
+    }
+  }, [setLoading, setAnalysis, setError]);
+
+  const connectWebSocket = useCallback((file: File) => {
     return new Promise<WebSocket>((resolve, reject) => {
       const websocket = new WebSocket("wss://peky0yjg20.execute-api.eu-west-1.amazonaws.com/production");
       let connectionTimeout: NodeJS.Timeout;
@@ -34,33 +73,7 @@ export default function CVHelperPage() {
         resolve(websocket);
       };
 
-      websocket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('Received message:', data);
-          
-          switch (data.type) {
-            case 'start':
-              setLoading(true);
-              setAnalysis(prev => [...prev, data.message]);
-              break;
-            case 'complete':
-              setLoading(false);
-              setAnalysis(prev => [...prev, data.content]);
-              websocket.close(1000, 'Analysis complete');
-              break;
-            case 'error':
-              setError(data.message);
-              setLoading(false);
-              websocket.close(1000, 'Analysis error');
-              break;
-          }
-        } catch (err) {
-          console.error('Error processing message:', err);
-          setError('Error processing server message');
-          websocket.close(1000, 'Message processing error');
-        }
-      };
+      websocket.onmessage = handleWebSocketMessage;
 
       websocket.onerror = (error) => {
         console.error('WebSocket error:', error);
@@ -74,48 +87,118 @@ export default function CVHelperPage() {
         cleanup();
       };
 
-      // Set a connection timeout
       connectionTimeout = setTimeout(() => {
         websocket.close(1000, 'Connection timeout');
         reject(new Error('WebSocket connection timeout'));
       }, 5000);
     });
-  };
+  }, [handleWebSocketMessage, setWsConnected, setWs, setError]);
 
   const sendFileContent = async (websocket: WebSocket, file: File) => {
-    const reader = new FileReader();
+    const MAX_FRAME_SIZE = 24576; // 24KB
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000; // 1 second
     
-    reader.onload = async () => {
-      try {
-        const content = reader.result as string;
-        const base64Content = btoa(
-          encodeURIComponent(content).replace(
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = async () => {
+        try {
+          const content = reader.result as string;
+          const uploadId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+          const base64Content = btoa(encodeURIComponent(content).replace(
             /%([0-9A-F]{2})/g,
             (_, p1) => String.fromCharCode(parseInt(p1, 16))
-          )
-        );
-        
-        // Send the analysis request with the CV content
-        const message = {
-          action: "generate",
-          content: base64Content,
-          encoding: "base64"
-        };
-        
-        if (websocket.readyState === WebSocket.OPEN) {
-          websocket.send(JSON.stringify(message));
-        } else {
-          throw new Error('WebSocket connection closed');
+          ));
+          
+          // Split content into chunks
+          const chunks: string[] = [];
+          for (let i = 0; i < base64Content.length; i += MAX_FRAME_SIZE) {
+            chunks.push(base64Content.slice(i, i + MAX_FRAME_SIZE));
+          }
+          
+          // Track chunk acknowledgments
+          const chunkAcks = new Set<number>();
+          
+          // Create a promise for each chunk
+          const chunkPromises = chunks.map((chunk, index) => {
+            return new Promise<void>((resolveChunk, rejectChunk) => {
+              let retries = 0;
+              
+              const sendChunk = async () => {
+                try {
+                  if (websocket.readyState !== WebSocket.OPEN) {
+                    throw new Error('WebSocket connection closed');
+                  }
+                  
+                  const chunkMessage = {
+                    action: "generate",
+                    type: "chunk",
+                    uploadId,
+                    chunkIndex: index,
+                    totalChunks: chunks.length,
+                    content: chunk,
+                    isLastChunk: index === chunks.length - 1
+                  };
+                  
+                  websocket.send(JSON.stringify(chunkMessage));
+                  
+                  // Wait for acknowledgment
+                  const ackTimeout = setTimeout(() => {
+                    if (!chunkAcks.has(index)) {
+                      if (retries < MAX_RETRIES) {
+                        retries++;
+                        sendChunk();
+                      } else {
+                        rejectChunk(new Error(`Failed to get acknowledgment for chunk ${index}`));
+                      }
+                    }
+                  }, 5000);
+                  
+                  // Handle acknowledgment
+                  const handleAck = (event: MessageEvent) => {
+                    try {
+                      const data = JSON.parse(event.data);
+                      if (data.type === 'chunk_received' && 
+                          data.chunkIndex === index) {
+                        clearTimeout(ackTimeout);
+                        chunkAcks.add(index);
+                        resolveChunk();
+                      }
+                    } catch (err) {
+                      console.warn('Error parsing message:', err);
+                    }
+                  };
+                  
+                  websocket.addEventListener('message', handleAck);
+                  
+                } catch (error) {
+                  rejectChunk(error);
+                }
+              };
+              
+              sendChunk();
+            });
+          });
+          
+          // Wait for all chunks to be acknowledged
+          await Promise.all(chunkPromises);
+          
+          resolve(undefined);
+          
+        } catch (error) {
+          console.error('Error:', error);
+          reject('Failed to process file. Please try again.');
+          websocket.close(1000, 'Upload error');
         }
-        
-      } catch (error) {
-        console.error('Error:', error);
-        setError('Failed to process file. Please try again.');
-        websocket.close(1000, 'Upload error');
-      }
-    };
-
-    reader.readAsText(file);
+      };
+      
+      reader.onerror = () => {
+        reject('Failed to read file');
+      };
+      
+      reader.readAsText(file);
+    });
   };
 
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -16,7 +16,7 @@ import awsExports from '../aws-exports';
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: awsExports.aws_user_pools_id, // Use the value from aws-exports.js
+      userPoolId: awsExports.aws_user_pools_id,
       userPoolClientId: awsExports.aws_user_pools_web_client_id,
     }
   }

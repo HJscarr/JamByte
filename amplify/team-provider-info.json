@@ -13,12 +13,7 @@
     },
     "categories": {
       "auth": {
-        "jambyte7d688e29": {
-          "userPoolId": "eu-west-1_OphuNSlQY",
-          "userPoolName": "jambyteio7b7821a8_userpool_7b7821a8-staging",
-          "webClientId": "2csek951tgp7r9pbntmfnqnpro",
-          "nativeClientId": "694utpe2inin0c93l8vorsu1vg"
-        }
+        "jambyte83fc192e": {}
       }
     }
   }
