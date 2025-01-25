@@ -5,12 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { RocketLaunchIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import { useCookiesContext } from "../context/CookiesContext";
 import { useUser } from "../context/UserContext";
 import CheckoutHandler from "./CheckoutHandler";
 import StockChecker from "./StockChecker";
-import { AmplifyUser, UserAttributes } from '../data/user';
+import { createClient } from '@/utils/client';
 
 const product = {
   name: "Pi-Guard",
@@ -76,6 +75,7 @@ export const BoxAndDesc = () => {
   const [hasBought, setHasBought] = useState<boolean>(false);
   const [cookiesSet] = useCookiesContext();
   const [successUrl, setSuccessUrl] = useState<string>('');
+  const supabase = createClient();
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);
@@ -83,21 +83,10 @@ export const BoxAndDesc = () => {
 
   const checkUser = async () => {
     try {
-      const currentUser = await getCurrentUser();
-      const userAttributes = await fetchUserAttributes();
-      
-      const attributes: UserAttributes = {
-        username: currentUser.username,
-        email: userAttributes.email || '',
-        firstName: userAttributes.given_name || ''
-      };
-
-      const amplifyUser: AmplifyUser = { attributes };
-      
-      setUser(amplifyUser);
-      console.log("User attributes are fetched");
-      console.log(currentUser);
-      console.log(userAttributes.given_name);
+      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      setUser(supabaseUser);
+      console.log("User authenticated");
     } catch (error) {
       console.error("User is not signed in", error);
       setUser(null);
@@ -106,9 +95,9 @@ export const BoxAndDesc = () => {
 
   useEffect(() => {
     checkUser().then(() => {
-      if (user?.attributes?.email) {
+      if (user?.email) {
         fetch(
-          `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.attributes.email}`
+          `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.email}`
         )
           .then((response) => {
             if (!response.ok) throw new Error("Failed to fetch");
@@ -125,7 +114,7 @@ export const BoxAndDesc = () => {
           });
       }
     });
-  }, []);
+  }, [user]);
 
   return (
     <div className="overflow-hidden bg-gray-900 pb-32 mt-6 sm:mt-20 sm:px-40">

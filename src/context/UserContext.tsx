@@ -1,14 +1,14 @@
 'use client'
 
-import React, { createContext, useState, useContext, ReactNode, FunctionComponent } from 'react';
-import { AmplifyUser } from '../data/user';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { User } from '@supabase/supabase-js';
 
-type UserContextType = {
-  user: AmplifyUser | null;
-  setUser: React.Dispatch<React.SetStateAction<AmplifyUser | null>>;
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
   modalState: ModalState;
   setModalState: React.Dispatch<React.SetStateAction<ModalState>>;
-};
+}
 
 type ModalState = {
   showLoginModal: boolean;
@@ -29,13 +29,15 @@ const defaultModalState: ModalState = {
 // Creating a context with an undefined default value to enforce context provider usage
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: FunctionComponent<{children: ReactNode}> = ({ children }) => {
-  const [user, setUser] = useState<AmplifyUser | null>(null);
+export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [modalState, setModalState] = useState<ModalState>(defaultModalState);
 
-  const value = { user, setUser, modalState, setModalState };
-
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={{ user, setUser, modalState, setModalState }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
 // Custom hook for easier consumption of the context

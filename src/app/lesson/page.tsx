@@ -43,14 +43,14 @@ const Lesson: React.FC = () => {
   };
 
   const fetchPrivateVideoToken = async (playbackId: string) => {
-    if (!user?.attributes?.email) {
+    if (!user?.email) {
       console.error("No user email available");
       return null;
     }
 
     try {
       const response = await fetch(
-        `https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.attributes.email)}&playback_id=${playbackId}`,
+        `https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.email)}&playback_id=${playbackId}`,
         {
           method: 'GET',
           headers: {
@@ -141,7 +141,7 @@ const Lesson: React.FC = () => {
   };
 
   const sendProgressUpdate = async (time: number) => {
-    if (!user?.attributes?.email || !currentLesson.length) return;
+    if (!user?.email || !currentLesson.length) return;
 
     const [mins, secs] = currentLesson.length.split(":").map(Number);
     if (mins === 0 && secs === 0) return;
@@ -151,7 +151,7 @@ const Lesson: React.FC = () => {
         mode: 'cors',
         method: 'PUT',
         body: JSON.stringify({
-          user_email: user.attributes.email,
+          user_email: user.email,
           course_name: "Pi-Guard",
           video_index: currentIndex + 1,
           progress: Math.min(1.0, Math.max(0.0, time / (mins * 60 + secs)))
@@ -233,8 +233,8 @@ const Lesson: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    if (user && user.attributes.email) {
-      fetchUserProgress(user.attributes.email, "Pi-Guard");
+    if (user?.email) {
+      fetchUserProgress(user.email, "Pi-Guard");
     }
   }, [user]);
 

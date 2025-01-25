@@ -4,13 +4,12 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
-import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import getStripe from '@/lib/GetStripe';
 import { useUser } from '@/context/UserContext';
 import { useCookiesContext } from '@/context/CookiesContext';
 import CheckoutHandler from './CheckoutHandler';
 import StockChecker from './StockChecker';
-import { AmplifyUser, UserAttributes } from '../data/user';
+import { createClient } from '@/utils/client';
 
 interface CourseProps {
   title: string;
@@ -27,8 +26,9 @@ const CourseCard: React.FC<CourseProps> = ({
   title, 
   description, 
   imageUrl, 
+  mobileImageUrl, 
   details, 
-  showActions = false, 
+  showActions = true, 
   productID, 
   status 
 }) => {
@@ -36,28 +36,18 @@ const CourseCard: React.FC<CourseProps> = ({
   const [hasBought, setHasBought] = useState<boolean>(false);
   const [cookiesSet] = useCookiesContext();
   const [successUrl, setSuccessUrl] = useState<string>('');
-  const [cancelUrl, setCancelUrl] = useState<string>('');
+  const supabase = createClient();
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);
-    setCancelUrl(`${window.location.origin}/Pi-Guard`);
   }, []);
 
   const checkUser = async () => {
     try {
-      const currentUser = await getCurrentUser();
-      const userAttributes = await fetchUserAttributes();
-      
-      const attributes: UserAttributes = {
-        username: currentUser.username,
-        email: userAttributes.email || '',
-        firstName: userAttributes.given_name || ''
-      };
-
-      const amplifyUser: AmplifyUser = { attributes };
-      
-      setUser(amplifyUser);
-      console.log("User attributes are fetched");
+      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      setUser(supabaseUser);
+      console.log("User authenticated");
     } catch (error) {
       console.error("User is not signed in", error);
       setUser(null);
@@ -65,23 +55,26 @@ const CourseCard: React.FC<CourseProps> = ({
   };
 
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  useEffect(() => {
-    if (user?.attributes?.email) {
-      fetch(`https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.attributes.email}`)
-        .then(response => response.json())
-        .then(data => {
-          if (Array.isArray(data) && data.includes(title)) {
-            setHasBought(true);
-            console.log("Course already bought!")
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching course data:', error);
-        });
-    }
+    checkUser().then(() => {
+      if (user?.email) {
+        fetch(
+          `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.email}`
+        )
+          .then((response) => {
+            if (!response.ok) throw new Error("Failed to fetch");
+            return response.json();
+          })
+          .then((data) => {
+            if (Array.isArray(data) && data.includes(title)) {
+              setHasBought(true);
+              console.log("Course already bought!");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching course data:", error);
+          });
+      }
+    });
   }, [user, title]);
 
   const handleCheckout = async () => {
@@ -100,11 +93,11 @@ const CourseCard: React.FC<CourseProps> = ({
       ],
       mode: 'payment',
       successUrl,
-      cancelUrl,
+      cancelUrl: `${window.location.origin}/Pi-Guard`,
     };
 
-    if (user?.attributes?.email) {
-      config.customerEmail = user.attributes.email;
+    if (user?.email) {
+      config.customerEmail = user.email;
     }
 
     try {

@@ -34,8 +34,8 @@ const CheckoutHandler: React.FC<CheckoutHandlerProps> = ({ priceID, successUrl, 
             cancelUrl: cancelUrl,
         };
 
-        if (user && user.attributes && user.attributes.email) {
-            config.customerEmail = user.attributes.email;
+        if (user?.email) {
+            config.customerEmail = user.email;
         }
 
         try {
@@ -69,12 +69,13 @@ const CheckoutHandler: React.FC<CheckoutHandlerProps> = ({ priceID, successUrl, 
 
     return (
         <button
-            type="button"
             onClick={handleCheckout}
-            className="flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 sm:px-10 py-2 sm:py-3 whitespace-nowrap text-sm sm:text-base font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-4 sm:px-5 py-2 sm:py-3 whitespace-nowrap text-sm sm:text-base font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 z-15"
         >
-            Buy&nbsp;now
-            <ShoppingCartIcon className="ml-2 h-5 w-5 text-white" />
+            Buy Now
+            <span className="ml-1 h-5 w-5 flex-shrink-0">
+                <ShoppingCartIcon className="text-white" />
+            </span>
         </button>
     );
 };

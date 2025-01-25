@@ -1,3 +1,5 @@
+// This file can be deleted if it was only used for CloudFront cookies
+
 'use client'
 import React, { createContext, useContext, useState } from 'react';
 

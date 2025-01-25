@@ -6,10 +6,8 @@ import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outlin
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { getCurrentUser, fetchUserAttributes, signOut } from 'aws-amplify/auth';
-import { useCookiesContext } from '../context/CookiesContext';
 import { useUser } from '../context/UserContext';
-import { AmplifyUser, UserAttributes } from '../data/user';
+import { createClient } from '@/utils/client';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -26,113 +24,34 @@ export const Navbar = () => {
   ], [pathname]);
 
   const { user, setUser, setModalState } = useUser();
-  const [, setCookiesSet] = useCookiesContext();
   const [isScrolled, setIsScrolled] = useState(false);
+  const supabase = createClient();
 
   const checkUser = useCallback(async () => {
     try {
-      const currentUser = await getCurrentUser();
-      const userAttributes = await fetchUserAttributes();
-      
-      const attributes: UserAttributes = {
-        username: currentUser.username,
-        email: userAttributes.email || '',
-        firstName: userAttributes.given_name || ''
-      };
-
-      const amplifyUser: AmplifyUser = { attributes };
-      
-      setUser(amplifyUser);
+      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      setUser(supabaseUser);
       console.log("User attributes are fetched");
     } catch (error) {
       console.error("User is not signed in", error);
       setUser(null);
     }
-  }, [setUser]);
+  }, [setUser, supabase.auth]);
 
   useEffect(() => {
     checkUser();
   }, [checkUser]);
 
-  useEffect(() => {
-    if (user?.attributes?.email) {
-      fetch(`https://41ivi5p9sj.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.attributes.email}`)
-        .then(response => response.json())
-        .then(data => {
-          console.log("Received cookie data:", data);
-          
-          // Try different approaches for different environments
-          const isLocalhost = window.location.hostname === 'localhost';
-          const cookieOptions = isLocalhost
-            ? 'Path=/; Secure; SameSite=None'
-            : 'Domain=.jambyte.io; Path=/; Secure; SameSite=None';
-  
-          try {
-            // Approach 1: Set cookies individually with full options
-            const cookies = [
-              `CloudFront-Policy=${encodeURIComponent(data['CloudFront-Policy'])}`,
-              `CloudFront-Signature=${encodeURIComponent(data['CloudFront-Signature'])}`,
-              `CloudFront-Key-Pair-Id=${encodeURIComponent(data['CloudFront-Key-Pair-Id'])}`
-            ];
-  
-            cookies.forEach(cookie => {
-              const fullCookie = `${cookie}; ${cookieOptions}`;
-              // console.log('Setting cookie:', fullCookie);
-              document.cookie = fullCookie;
-            });
-  
-            // Verify immediately after setting
-            const currentCookies = document.cookie;
-            // console.log('Current cookies after setting:', currentCookies);
-  
-            // Check if cookies were actually set
-            const policyCookie = document.cookie.match(/CloudFront-Policy=([^;]*)/);
-            const signatureCookie = document.cookie.match(/CloudFront-Signature=([^;]*)/);
-            const keyPairCookie = document.cookie.match(/CloudFront-Key-Pair-Id=([^;]*)/);
-  
-            if (!policyCookie || !signatureCookie || !keyPairCookie) {
-              console.warn('Some cookies not set. Trying alternative approach...');
-              
-              // Try alternative approach using a proxy endpoint
-              return fetch('/api/set-cookies', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-                credentials: 'include'
-              });
-            }
-  
-            setCookiesSet(true);
-          } catch (error) {
-            console.error('Error setting cookies:', error);
-            setCookiesSet(false);
-          }
-        })
-        .catch(err => {
-          console.error('Error in cookie setting process:', err);
-          setCookiesSet(false);
-        });
-    }
-  }, [user]);
-  
   const handleSignOut = useCallback(async () => {
     try {
-      await signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setUser(null);
-  
-      // Clear cookies exactly as in working version
-      const cookieOptions = 'Domain=.jambyte.io; Path=/; SameSite=None; Secure;';
-      document.cookie = `CloudFront-Policy=; expires=Thu, 01 Jan 1970 00:00:00 UTC; ${cookieOptions}`;
-      document.cookie = `CloudFront-Signature=; expires=Thu, 01 Jan 1970 00:00:00 UTC; ${cookieOptions}`;
-      document.cookie = `CloudFront-Key-Pair-Id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; ${cookieOptions}`;
-  
-      setCookiesSet(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  }, [setUser, setCookiesSet]);
+  }, [setUser, supabase.auth]);
 
   return (
     <Disclosure as="nav" className={`w-full z-50 transition duration-300 ease-in-out ${isScrolled ? 'bg-opacity-90 bg-gray-transparent' : 'bg-transparent'}`}>
@@ -184,50 +103,50 @@ export const Navbar = () => {
                 </div>
               </div>
               <div className="absolute inset-y-0 right-0 w-auto flex items-center sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            <Menu as="div" className="relative ml-3">
-              <div>
-                {user?.attributes?.firstName ? (
-                  <MenuButton className="text-white mr-4">
-                    Hello, <span className="text-secondary font-semibold">{user.attributes.firstName}</span>!
-                  </MenuButton>
-                ) : (
-                  <button
-                    className="relative text-gray-200 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded flex items-center justify-center gap-2 md:px-14 md:py-3 px-4 py-2 text-xs md:text-sm font-medium whitespace-nowrap hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-[120px] md:w-[140px]"
-                    onClick={() => setModalState(prev => ({ ...prev, showLoginModal: !prev.showLoginModal }))}
+                <Menu as="div" className="relative ml-3">
+                  <div>
+                    {user?.user_metadata?.first_name ? (
+                      <MenuButton className="text-white mr-4">
+                        Hello, <span className="text-secondary font-semibold">{user.user_metadata.first_name}</span>!
+                      </MenuButton>
+                    ) : (
+                      <button
+                        className="relative text-gray-200 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded flex items-center justify-center gap-2 md:px-14 md:py-3 px-4 py-2 text-xs md:text-sm font-medium whitespace-nowrap hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-[120px] md:w-[140px]"
+                        onClick={() => setModalState(prev => ({ ...prev, showLoginModal: !prev.showLoginModal }))}
+                      >
+                        <span>Sign In/Up</span>
+                        <UserCircleIcon className="h-3 w-3 md:h-5 md:w-5 flex-shrink-0 text-white" />
+                      </button>
+                    )}
+                  </div>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
                   >
-                    <span>Sign In/Up</span>
-                    <UserCircleIcon className="h-3 w-3 md:h-5 md:w-5 flex-shrink-0 text-white" />
-                  </button>
-                )}
+                    <MenuItems className="absolute right-0 z-40 mt-2 w-auto origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      {user ? (
+                        <MenuItem>
+                          {({ focus }) => (
+                            <button
+                              onClick={handleSignOut}
+                              className={`${
+                                focus ? 'bg-gray-100' : ''
+                              } block w-full px-4 py-2 text-sm text-gray-700 text-left`}
+                            >
+                              Sign out
+                            </button>
+                          )}
+                        </MenuItem>
+                      ) : null}
+                    </MenuItems>
+                  </Transition>
+                </Menu>
               </div>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <MenuItems className="absolute right-0 z-40 mt-2 w-auto origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  {user ? (
-                    <MenuItem>
-                      {({ focus }) => (
-                        <button
-                          onClick={handleSignOut}
-                          className={`${
-                            focus ? 'bg-gray-100' : ''
-                          } block w-full px-4 py-2 text-sm text-gray-700 text-left`}
-                        >
-                          Sign out
-                        </button>
-                      )}
-                    </MenuItem>
-                  ) : null}
-                </MenuItems>
-              </Transition>
-            </Menu>
-          </div>
             </div>
           </div>
 

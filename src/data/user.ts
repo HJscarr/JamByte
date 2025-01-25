@@ -1,9 +1,1 @@
-export type UserAttributes = {
-  username: string;
-  email: string;
-  firstName: string;  
-};
-
-export type AmplifyUser = {
-  attributes: UserAttributes;
-};
+// This file can be deleted as we're now using Supabase's User type

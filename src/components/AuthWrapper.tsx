@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import UserAuth from './UserAuth';
-import { getCurrentUser, fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
+import { createClient } from '@/utils/client';
 
 // Define the UserAttributes type based on your UserContext
 interface UserAttributes {
@@ -18,44 +18,53 @@ interface UserAttributes {
 
 const AuthWrapper: React.FC = () => {
   const { setUser, modalState, setModalState } = useUser();
+  const supabase = createClient();
 
   const checkUser = async () => {
     try {
-      const { username, userId, signInDetails } = await getCurrentUser();
-      const userAttributes = await fetchUserAttributes();
-      const { tokens } = await fetchAuthSession();
-
-      const userData: UserAttributes = {
-        username,
-        userId,
-        email: userAttributes.email ?? '',
-        firstName: userAttributes.given_name ?? '',
-        signInDetails: JSON.stringify(signInDetails),
-        accessToken: tokens?.accessToken?.toString() ?? '',
-        idToken: tokens?.idToken?.toString() ?? ''
-      };
-
-      setUser({ attributes: userData });
-      console.log("User authenticated and attributes fetched");
-      console.log(`Username: ${username}`);
-      console.log(`User ID: ${userId}`);
-      console.log(`Sign-in details:`, signInDetails);
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      setUser(user);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error checking user:", error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
+      console.error("Error checking user:", error);
       setUser(null);
     }
   };
 
+  useEffect(() => {
+    checkUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLoginModalChange = useCallback<React.Dispatch<React.SetStateAction<boolean>>>(
+    (value) => {
+      setModalState(prev => ({
+        ...prev,
+        showLoginModal: typeof value === 'function' ? value(prev.showLoginModal) : value
+      }));
+    },
+    [setModalState]
+  );
+
+  const handleSignUpModalChange = useCallback<React.Dispatch<React.SetStateAction<boolean>>>(
+    (value) => {
+      setModalState(prev => ({
+        ...prev,
+        showSignUpModal: typeof value === 'function' ? value(prev.showSignUpModal) : value
+      }));
+    },
+    [setModalState]
+  );
+
   return (
     <UserAuth
       showLoginModal={modalState.showLoginModal}
-      setShowLoginModal={() => setModalState(prev => ({ ...prev, showLoginModal: !prev.showLoginModal }))}
+      setShowLoginModal={handleLoginModalChange}
       showSignUpModal={modalState.showSignUpModal}
-      setShowSignUpModal={() => setModalState(prev => ({ ...prev, showSignUpModal: !prev.showSignUpModal }))}
+      setShowSignUpModal={handleSignUpModalChange}
       checkUser={checkUser}
     />
   );
