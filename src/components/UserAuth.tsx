@@ -1,9 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import { useUser } from '../context/UserContext';
-import { createClient } from '@/utils/client';
+import { useAuth } from '@/context/AuthContext';
 
 interface AuthComponentProps {
   checkUser: () => Promise<void>;
@@ -18,81 +16,70 @@ const UserAuth: React.FC<AuthComponentProps> = ({
   showLoginModal, setShowLoginModal,
   showSignUpModal, setShowSignUpModal
 }) => {
-  // Sign-in state
+  const auth = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [signInError, setSignInError] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sign-up state
-  const [signUpFirstname, setSignUpFirstname] = useState('');
-  const [signUpLastName, setSignUpLastName] = useState('');
-  const [signUpEmail, setSignUpEmail] = useState('');
-  const [signUpPassword, setSignUpPassword] = useState('');
-  const [signUpError, setSignUpError] = useState<string | null>(null);
-
-  // Password reset state
-  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
-  const [forgotPasswordError, setForgotPasswordError] = useState<string | null>(null);
-
-  const supabase = createClient();
-
-  const handleSignIn = async () => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      setSignInError(null);
+      await auth.signIn(email, password);
       setShowLoginModal(false);
-      checkUser();
+      setError(null);
     } catch (error: any) {
       console.error("Error signing in", error);
-      setSignInError(error.message);
+      setError(error.message);
     }
   };
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     try {
-      const { error } = await supabase.auth.signUp({
-        email: signUpEmail,
-        password: signUpPassword,
-        options: {
-          data: {
-            first_name: signUpFirstname,
-            last_name: signUpLastName,
-          },
-        },
+      await auth.signUp(email, password, {
+        given_name: firstName,
+        family_name: lastName,
+        email: email
       });
-
-      if (error) throw error;
-
-      setSignUpError(null);
       setShowSignUpModal(false);
-      alert('Please check your email for the confirmation link.');
+      setShowVerificationModal(true);
+      setError(null);
     } catch (error: any) {
       console.error("Error signing up", error);
-      setSignUpError(error.message);
+      setError(error.message);
     }
+  };
+
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await auth.confirmSignUp(email, verificationCode);
+      setShowVerificationModal(false);
+      setShowLoginModal(true);
+      alert('Account verified successfully! Please sign in.');
+    } catch (error: any) {
+      console.error("Error verifying account", error);
+      setError(error.message);
+    }
+  };
+
+  const switchToSignUp = () => {
+    setShowLoginModal(false);
+    setShowSignUpModal(true);
   };
 
   const handleForgotPassword = async () => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
-
-      if (error) throw error;
-
-      setForgotPasswordError(null);
-      setShowForgotPasswordModal(false);
-      alert('Please check your email for the password reset link.');
+      const cognitoDomain = "https://your-cognito-domain.auth.eu-west-1.amazoncognito.com";
+      const clientId = "18506g2uv82srnppeqn6bm673d";
+      const redirectUri = encodeURIComponent(`${window.location.origin}/login`);
+      window.location.href = `${cognitoDomain}/forgotPassword?client_id=${clientId}&redirect_uri=${redirectUri}`;
     } catch (error: any) {
-      console.error('Error sending password reset email', error);
-      setForgotPasswordError(error.message);
+      console.error('Error with password reset', error);
     }
   };
 
@@ -112,51 +99,40 @@ const UserAuth: React.FC<AuthComponentProps> = ({
               </svg>
             </button>
             <h2 className="text-2xl font-bold mb-4">Sign In</h2>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <button
-              onClick={handleSignIn}
-              className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700 mb-4"
-            >
-              Sign In
-            </button>
-            <div className="flex justify-between text-sm">
+            <form onSubmit={handleSignIn}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+              <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">
+                Sign In
+              </button>
+            </form>
+            <div className="flex justify-between text-sm mt-4">
               <button
-                onClick={() => {
-                  setShowLoginModal(false);
-                  setShowSignUpModal(true);
-                }}
+                onClick={switchToSignUp}
                 className="text-secondary hover:text-pink-700"
               >
                 Create an account
               </button>
               <button
-                onClick={() => {
-                  setShowLoginModal(false);
-                  setShowForgotPasswordModal(true);
-                }}
+                onClick={handleForgotPassword}
                 className="text-secondary hover:text-pink-700"
               >
                 Forgot password?
               </button>
             </div>
-            {signInError && (
-              <div className="text-red-600 p-2 rounded-md bg-red-100 mt-2">
-                {signInError}
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -175,64 +151,50 @@ const UserAuth: React.FC<AuthComponentProps> = ({
               </svg>
             </button>
             <h2 className="text-2xl font-bold mb-4">Create Account</h2>
-            <input
-              type="text"
-              placeholder="First Name"
-              value={signUpFirstname}
-              onChange={(e) => setSignUpFirstname(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={signUpLastName}
-              onChange={(e) => setSignUpLastName(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={signUpEmail}
-              onChange={(e) => setSignUpEmail(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={signUpPassword}
-              onChange={(e) => setSignUpPassword(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <button
-              onClick={handleSignUp}
-              className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700 mb-4"
-            >
-              Sign Up
-            </button>
-            <button
-              onClick={() => {
-                setShowSignUpModal(false);
-                setShowLoginModal(true);
-              }}
-              className="text-sm text-secondary hover:text-pink-700"
-            >
-              Already have an account? Sign in
-            </button>
-            {signUpError && (
-              <div className="text-red-600 p-2 rounded-md bg-red-100 mt-2">
-                {signUpError}
-              </div>
-            )}
+            <form onSubmit={handleSignUp}>
+              <input
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+              <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">
+                Sign Up
+              </button>
+            </form>
           </div>
         </div>
       )}
 
-      {/* Forgot Password Modal */}
-      {showForgotPasswordModal && (
+      {/* Verification Modal */}
+      {showVerificationModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="relative bg-white rounded-lg shadow-xl p-8 m-4 max-w-xl w-full">
             <button
-              onClick={() => setShowForgotPasswordModal(false)}
+              onClick={() => setShowVerificationModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
             >
               <span className="sr-only">Close</span>
@@ -240,25 +202,21 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-2xl font-bold mb-4">Reset Password</h2>
-            <input
-              type="email"
-              placeholder="Email"
-              value={forgotPasswordEmail}
-              onChange={(e) => setForgotPasswordEmail(e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mb-4"
-            />
-            <button
-              onClick={handleForgotPassword}
-              className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700 mb-4"
-            >
-              Send Reset Link
-            </button>
-            {forgotPasswordError && (
-              <div className="text-red-600 p-2 rounded-md bg-red-100 mt-2">
-                {forgotPasswordError}
-              </div>
-            )}
+            <h2 className="text-2xl font-bold mb-4">Verify Your Account</h2>
+            <p className="mb-4">Please enter the verification code sent to your email.</p>
+            <form onSubmit={handleVerification}>
+              <input
+                type="text"
+                placeholder="Verification Code"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+              />
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+              <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">
+                Verify Account
+              </button>
+            </form>
           </div>
         </div>
       )}

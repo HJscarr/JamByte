@@ -1,11 +1,18 @@
 'use client'
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { User } from '@supabase/supabase-js';
+
+interface CognitoUser {
+  id: string;
+  email?: string;
+  user_metadata: {
+    first_name?: string;
+  };
+}
 
 interface UserContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: CognitoUser | null;
+  setUser: (user: CognitoUser | null) => void;
   modalState: ModalState;
   setModalState: React.Dispatch<React.SetStateAction<ModalState>>;
 }
@@ -30,7 +37,7 @@ const defaultModalState: ModalState = {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<CognitoUser | null>(null);
   const [modalState, setModalState] = useState<ModalState>(defaultModalState);
 
   return (

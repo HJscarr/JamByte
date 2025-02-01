@@ -3,28 +3,37 @@
 import React, { useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import UserAuth from './UserAuth';
-import { createClient } from '@/utils/client';
+import { useAuth } from '@/context/AuthContext';
 
-// Define the UserAttributes type based on your UserContext
+// Define the UserAttributes type based on your Cognito user attributes
 interface UserAttributes {
   username: string;
-  userId: string;
+  sub: string;
   email: string;
-  firstName: string;
-  signInDetails: string;
-  accessToken: string;
-  idToken: string;
+  given_name: string;
+  'custom:signInDetails'?: string;
+  access_token: string;
+  id_token: string;
 }
 
 const AuthWrapper: React.FC = () => {
   const { setUser, modalState, setModalState } = useUser();
-  const supabase = createClient();
+  const auth = useAuth();
 
   const checkUser = async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      setUser(user);
+      if (auth.isAuthenticated && auth.user) {
+        const cognitoUser = {
+          id: auth.user.profile.sub,
+          email: auth.user.profile.email,
+          user_metadata: {
+            first_name: auth.user.profile.given_name,
+          }
+        };
+        setUser(cognitoUser);
+      } else {
+        setUser(null);
+      }
     } catch (error) {
       console.error("Error checking user:", error);
       setUser(null);
@@ -33,11 +42,11 @@ const AuthWrapper: React.FC = () => {
 
   useEffect(() => {
     checkUser();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+    // Listen for auth state changes
+    if (auth.isLoading) return;
+    
+    checkUser();
+  }, [auth.isAuthenticated, auth.user, auth.isLoading]);
 
   const handleLoginModalChange = useCallback<React.Dispatch<React.SetStateAction<boolean>>>(
     (value) => {

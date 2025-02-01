@@ -9,7 +9,7 @@ import { useUser } from '@/context/UserContext';
 import { useCookiesContext } from '@/context/CookiesContext';
 import CheckoutHandler from './CheckoutHandler';
 import StockChecker from './StockChecker';
-import { createClient } from '@/utils/client';
+import { useAuth } from '@/context/AuthContext';
 
 interface CourseProps {
   title: string;
@@ -32,50 +32,36 @@ const CourseCard: React.FC<CourseProps> = ({
   productID, 
   status 
 }) => {
-  const { user, setUser } = useUser();
+  const { user } = useUser();
   const [hasBought, setHasBought] = useState<boolean>(false);
   const [cookiesSet] = useCookiesContext();
   const [successUrl, setSuccessUrl] = useState<string>('');
-  const supabase = createClient();
+  const auth = useAuth();
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);
   }, []);
 
-  const checkUser = async () => {
-    try {
-      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      setUser(supabaseUser);
-      console.log("User authenticated");
-    } catch (error) {
-      console.error("User is not signed in", error);
-      setUser(null);
-    }
-  };
-
   useEffect(() => {
-    checkUser().then(() => {
-      if (user?.email) {
-        fetch(
-          `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.email}`
-        )
-          .then((response) => {
-            if (!response.ok) throw new Error("Failed to fetch");
-            return response.json();
-          })
-          .then((data) => {
-            if (Array.isArray(data) && data.includes(title)) {
-              setHasBought(true);
-              console.log("Course already bought!");
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching course data:", error);
-          });
-      }
-    });
-  }, [user, title]);
+    if (auth.isAuthenticated && auth.user?.profile.email) {
+      fetch(
+        `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${auth.user.profile.email}`
+      )
+        .then((response) => {
+          if (!response.ok) throw new Error("Failed to fetch");
+          return response.json();
+        })
+        .then((data) => {
+          if (Array.isArray(data) && data.includes(title)) {
+            setHasBought(true);
+            console.log("Course already bought!");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching course data:", error);
+        });
+    }
+  }, [auth.isAuthenticated, auth.user, title]);
 
   const handleCheckout = async () => {
     const stripe = await getStripe();
@@ -96,8 +82,8 @@ const CourseCard: React.FC<CourseProps> = ({
       cancelUrl: `${window.location.origin}/Pi-Guard`,
     };
 
-    if (user?.email) {
-      config.customerEmail = user.email;
+    if (auth.user?.profile.email) {
+      config.customerEmail = auth.user.profile.email;
     }
 
     try {

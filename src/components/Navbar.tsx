@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser } from '../context/UserContext';
-import { createClient } from '@/utils/client';
+import { useAuth } from '@/context/AuthContext';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -25,33 +25,30 @@ export const Navbar = () => {
 
   const { user, setUser, setModalState } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
-  const supabase = createClient();
-
-  const checkUser = useCallback(async () => {
-    try {
-      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      setUser(supabaseUser);
-      console.log("User attributes are fetched");
-    } catch (error) {
-      console.error("User is not signed in", error);
-      setUser(null);
-    }
-  }, [setUser, supabase.auth]);
+  const auth = useAuth();
 
   useEffect(() => {
-    checkUser();
-  }, [checkUser]);
-
-  const handleSignOut = useCallback(async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+    if (auth.isAuthenticated && auth.user) {
+      const cognitoUser = {
+        id: auth.user.profile.sub,
+        email: auth.user.profile.email,
+        user_metadata: {
+          first_name: auth.user.profile.given_name,
+        }
+      };
+      setUser(cognitoUser);
+    } else {
       setUser(null);
-    } catch (error) {
-      console.error('Error signing out:', error);
     }
-  }, [setUser, supabase.auth]);
+  }, [auth.isAuthenticated, auth.user, setUser]);
+
+  const handleSignOut = async () => {
+    await auth.signOut();
+    const clientId = "18506g2uv82srnppeqn6bm673d";
+    const logoutUri = encodeURIComponent(window.location.origin);
+    const cognitoDomain = "https://your-cognito-domain.auth.eu-west-1.amazoncognito.com";
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${logoutUri}`;
+  };
 
   return (
     <Disclosure as="nav" className={`w-full z-50 transition duration-300 ease-in-out ${isScrolled ? 'bg-opacity-90 bg-gray-transparent' : 'bg-transparent'}`}>
@@ -129,7 +126,7 @@ export const Navbar = () => {
                     leaveTo="transform opacity-0 scale-95"
                   >
                     <MenuItems className="absolute right-0 z-40 mt-2 w-auto origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      {user ? (
+                      {auth.isAuthenticated ? (
                         <MenuItem>
                           {({ focus }) => (
                             <button
