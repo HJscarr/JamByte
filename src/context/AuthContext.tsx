@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
 import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 
 interface CognitoUserProfile {
@@ -33,6 +33,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<AuthContextType['user']>(null);
+
+  useEffect(() => {
+    const currentUser = userPool.getCurrentUser();
+    if (currentUser) {
+      currentUser.getSession((err: any, session: any) => {
+        if (err) {
+          console.error('Error getting session:', err);
+          setIsLoading(false);
+          return;
+        }
+        
+        if (session.isValid()) {
+          currentUser.getUserAttributes((err, attributes) => {
+            if (err) {
+              console.error('Error getting user attributes:', err);
+              setIsLoading(false);
+              return;
+            }
+
+            const profile: CognitoUserProfile = {
+              sub: '',
+              email: '',
+            };
+
+            attributes?.forEach(attr => {
+              switch (attr.getName()) {
+                case 'sub':
+                  profile.sub = attr.getValue();
+                  break;
+                case 'email':
+                  profile.email = attr.getValue();
+                  break;
+                case 'given_name':
+                  profile.given_name = attr.getValue();
+                  break;
+                case 'family_name':
+                  profile.family_name = attr.getValue();
+                  break;
+              }
+            });
+
+            setUser({ profile });
+            setIsAuthenticated(true);
+          });
+        }
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -76,8 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             });
 
-            setIsAuthenticated(true);
             setUser({ profile });
+            setIsAuthenticated(true);
             resolve();
           });
         },

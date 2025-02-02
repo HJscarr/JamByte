@@ -34,7 +34,22 @@ const Lesson: React.FC = () => {
   const fetchLessons = async (): Promise<any[]> => {
     try {
       const response = await fetch('https://i6qq5oz60f.execute-api.eu-west-1.amazonaws.com/default/PiSpy-Video-Metadata-Retrieval');
-      const data = await response.json();
+      
+      // Log the response status and headers
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      // Get the raw text first
+      const text = await response.text();
+      console.log('Raw response:', text);
+      
+      // Only try to parse as JSON if we got a successful response
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+      }
+      
+      // Now try to parse as JSON
+      const data = JSON.parse(text);
       return data;
     } catch (error) {
       console.error("Error fetching lessons:", error);

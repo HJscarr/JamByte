@@ -82,7 +82,14 @@ export const BoxAndDesc = () => {
   }, []);
 
   useEffect(() => {
+    console.log('Auth state:', {
+      isAuthenticated: auth.isAuthenticated,
+      userEmail: auth.user?.profile.email,
+      productName: product.name
+    });
+
     if (auth.isAuthenticated && auth.user?.profile.email) {
+      console.log('Making API call for:', auth.user.profile.email);
       fetch(
         `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${auth.user.profile.email}`
       )
@@ -91,6 +98,7 @@ export const BoxAndDesc = () => {
           return response.json();
         })
         .then((data) => {
+          console.log('API response:', data);
           if (Array.isArray(data) && data.includes(product.name)) {
             setHasBought(true);
             console.log("Course already bought!");
