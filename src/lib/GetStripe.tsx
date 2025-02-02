@@ -10,8 +10,6 @@ const getStripe = (): Promise<Stripe | null> => {
       throw new Error("Stripe API key is not correctly configured");
     }
 
-    console.log("Stripe API Key: ", apiKey);
-
     stripePromise = loadStripe(apiKey);
   }
   return stripePromise;

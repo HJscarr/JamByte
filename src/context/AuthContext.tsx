@@ -23,8 +23,8 @@ interface AuthContextType {
 }
 
 const userPool = new CognitoUserPool({
-  UserPoolId: 'eu-west-1_h3Lu8eCZl',
-  ClientId: '18506g2uv82srnppeqn6bm673d'
+  UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
+  ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!
 });
 
 const AuthContext = createContext<AuthContextType | null>(null);
