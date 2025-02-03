@@ -3,8 +3,8 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { RocketLaunchIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { useCookiesContext } from '@/context/CookiesContext';
 import dynamic from 'next/dynamic';
+import { useHasBought } from '@/hooks/useHasBought';
 
 // Dynamically import illustrations with no SSR
 const HeroIllustration = dynamic(() => import('./HeroIllustration/HeroIllustration'), {
@@ -69,9 +69,9 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 };
 
 const Hero: React.FC = () => {
-  const [cookiesSet] = useCookiesContext();
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { data: hasBought = false } = useHasBought('Pi-Guard');
 
   useEffect(() => {
     const handleResize = () => {
@@ -102,20 +102,21 @@ const Hero: React.FC = () => {
           <span className="text-white">Technology education through building exciting electronic devices.</span>        
         </p>
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center">
-          {cookiesSet && (
+          {hasBought ? (
             <Link href="/lesson" className={`${isMobile ? 'text-sm px-2 py-2' : 'text-base md:px-4 md:py-3'} bg-gradient-to-r rounded from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 flex items-center justify-center w-full md:w-auto whitespace-nowrap`}>
               Start Learning
               <span className="icon-wrapper ml-2" style={{ display: 'inline-block', width: '24px', height: '24px' }}>
                 <RocketLaunchIcon className={`${isMobile ? 'h-4 w-4' : 'sm:h-5 sm:w-5'} text-white`} />
               </span>
             </Link>
+          ) : (
+            <Link href="/courses" className={`${isMobile ? 'text-sm px-2 py-2' : 'text-base md:px-4 md:py-3'} bg-gradient-to-r rounded from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 flex items-center justify-center w-full md:w-auto whitespace-nowrap`}>
+              Browse Courses
+              <span className="icon-wrapper ml-2" style={{ display: 'inline-block', width: '24px', height: '24px' }}>
+                <ArrowTopRightOnSquareIcon className={`${isMobile ? 'h-4 w-4' : 'sm:h-5 sm:w-5'} text-white`} />
+              </span>
+            </Link>
           )}
-          <Link href="/courses" className={`${isMobile ? 'text-sm px-2 py-2' : 'text-base md:px-4 md:py-3'} bg-gradient-to-r rounded from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 flex items-center justify-center w-full md:w-auto whitespace-nowrap`}>
-            Browse Courses
-            <span className="icon-wrapper ml-2" style={{ display: 'inline-block', width: '24px', height: '24px' }}>
-              <ArrowTopRightOnSquareIcon className={`${isMobile ? 'h-4 w-4' : 'sm:h-5 sm:w-5'} text-white`} />
-            </span>
-          </Link>
         </div>
       </div>
     </div>

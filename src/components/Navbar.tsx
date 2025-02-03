@@ -6,7 +6,6 @@ import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outlin
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUser } from '../context/UserContext';
 import { useAuth } from '@/context/AuthContext';
 
 function classNames(...classes: string[]) {
@@ -23,31 +22,11 @@ export const Navbar = () => {
     { name: 'About', href: '/about', current: pathname === '/about' },
   ], [pathname]);
 
-  const { user, setUser, setModalState } = useUser();
+  const { user, signOut, modalState, setModalState } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
-  const auth = useAuth();
 
-  useEffect(() => {
-    if (auth.isAuthenticated && auth.user) {
-      const cognitoUser = {
-        id: auth.user.profile.sub,
-        email: auth.user.profile.email,
-        user_metadata: {
-          first_name: auth.user.profile.given_name,
-        }
-      };
-      setUser(cognitoUser);
-    } else {
-      setUser(null);
-    }
-  }, [auth.isAuthenticated, auth.user, setUser]);
-
-  const handleSignOut = async () => {
-    await auth.signOut();
-    const clientId = "18506g2uv82srnppeqn6bm673d";
-    const logoutUri = encodeURIComponent(window.location.origin);
-    const cognitoDomain = "https://your-cognito-domain.auth.eu-west-1.amazoncognito.com";
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${logoutUri}`;
+  const handleLoginClick = () => {
+    setModalState(prev => ({ ...prev, showLoginModal: true }));
   };
 
   return (
@@ -102,14 +81,14 @@ export const Navbar = () => {
               <div className="absolute inset-y-0 right-0 w-auto flex items-center sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 <Menu as="div" className="relative ml-3">
                   <div>
-                    {user?.user_metadata?.first_name ? (
+                    {user?.profile?.given_name ? (
                       <MenuButton className="text-white mr-4">
-                        Hello, <span className="text-secondary font-semibold">{user.user_metadata.first_name}</span>!
+                        Hello, <span className="text-secondary font-semibold">{user.profile.given_name}</span>!
                       </MenuButton>
                     ) : (
                       <button
                         className="relative text-gray-200 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded flex items-center justify-center gap-2 md:px-14 md:py-3 px-4 py-2 text-xs md:text-sm font-medium whitespace-nowrap hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-[120px] md:w-[140px]"
-                        onClick={() => setModalState(prev => ({ ...prev, showLoginModal: !prev.showLoginModal }))}
+                        onClick={handleLoginClick}
                       >
                         <span>Sign In/Up</span>
                         <UserCircleIcon className="h-3 w-3 md:h-5 md:w-5 flex-shrink-0 text-white" />
@@ -126,11 +105,11 @@ export const Navbar = () => {
                     leaveTo="transform opacity-0 scale-95"
                   >
                     <MenuItems className="absolute right-0 z-40 mt-2 w-auto origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      {auth.isAuthenticated ? (
+                      {user ? (
                         <MenuItem>
                           {({ focus }) => (
                             <button
-                              onClick={handleSignOut}
+                              onClick={signOut}
                               className={`${
                                 focus ? 'bg-gray-100' : ''
                               } block w-full px-4 py-2 text-sm text-gray-700 text-left`}

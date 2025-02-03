@@ -20,7 +20,25 @@ interface AuthContextType {
   signUp: (email: string, password: string, attributes: Record<string, string>) => Promise<void>;
   signOut: () => Promise<void>;
   confirmSignUp: (email: string, code: string) => Promise<void>;
+  modalState: ModalState;
+  setModalState: React.Dispatch<React.SetStateAction<ModalState>>;
 }
+
+type ModalState = {
+  showLoginModal: boolean;
+  showSignUpModal: boolean;
+  showVerificationModal: boolean;
+  showForgotPasswordModal: boolean;
+  showResetPasswordModal: boolean;
+};
+
+const defaultModalState: ModalState = {
+  showLoginModal: false,
+  showSignUpModal: false,
+  showVerificationModal: false,
+  showForgotPasswordModal: false,
+  showResetPasswordModal: false,
+};
 
 const userPool = new CognitoUserPool({
   UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
@@ -33,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<AuthContextType['user']>(null);
+  const [modalState, setModalState] = useState<ModalState>(defaultModalState);
 
   useEffect(() => {
     const currentUser = userPool.getCurrentUser();
@@ -189,7 +208,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn, 
       signUp, 
       signOut,
-      confirmSignUp 
+      confirmSignUp,
+      modalState,
+      setModalState
     }}>
       {children}
     </AuthContext.Provider>

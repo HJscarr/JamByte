@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { useUser } from '../context/UserContext';
+import { useAuth } from '@/context/AuthContext';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 
 const SignUpBanner: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const { user, setModalState } = useUser();
+    const { user, modalState, setModalState } = useAuth();
 
     useEffect(() => {
         setIsMounted(true);

@@ -5,11 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { RocketLaunchIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import { useCookiesContext } from "../context/CookiesContext";
-import { useUser } from "../context/UserContext";
+import { useAuth } from '@/context/AuthContext';
 import CheckoutHandler from "./CheckoutHandler";
 import StockChecker from "./StockChecker";
-import { useAuth } from '@/context/AuthContext';
+import { useHasBought } from '@/hooks/useHasBought';
 
 const product = {
   name: "Pi-Guard",
@@ -71,44 +70,13 @@ function classNames(...classes: any) {
 }
 
 export const BoxAndDesc = () => {
-  const { user } = useUser();
-  const [hasBought, setHasBought] = useState<boolean>(false);
-  const [cookiesSet] = useCookiesContext();
   const [successUrl, setSuccessUrl] = useState<string>('');
+  const { data: hasBought = false } = useHasBought(product.name);
   const auth = useAuth();
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);
   }, []);
-
-  useEffect(() => {
-    console.log('Auth state:', {
-      isAuthenticated: auth.isAuthenticated,
-      userEmail: auth.user?.profile.email,
-      productName: product.name
-    });
-
-    if (auth.isAuthenticated && auth.user?.profile.email) {
-      console.log('Making API call for:', auth.user.profile.email);
-      fetch(
-        `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${auth.user.profile.email}`
-      )
-        .then((response) => {
-          if (!response.ok) throw new Error("Failed to fetch");
-          return response.json();
-        })
-        .then((data) => {
-          console.log('API response:', data);
-          if (Array.isArray(data) && data.includes(product.name)) {
-            setHasBought(true);
-            console.log("Course already bought!");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching course data:", error);
-        });
-    }
-  }, [auth.isAuthenticated, auth.user, product.name]);
 
   return (
     <div className="overflow-hidden bg-gray-900 pb-32 mt-6 sm:mt-20 sm:px-40">
@@ -171,7 +139,7 @@ export const BoxAndDesc = () => {
                 <StockChecker productId="price_1OkwbGGAlR94zWojhzJ8TgdB" />
               </div>
               <div className="pt-7 flex">
-                {hasBought || cookiesSet ? (
+                {hasBought ? (
                   <>
                     <Link href="/lesson">
                       <button

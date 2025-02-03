@@ -4,15 +4,13 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 interface AuthComponentProps {
-  checkUser: () => Promise<void>;
   showLoginModal: boolean;
-  setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowLoginModal: (show: boolean) => void;
   showSignUpModal: boolean;
-  setShowSignUpModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowSignUpModal: (show: boolean) => void;
 }
 
 const UserAuth: React.FC<AuthComponentProps> = ({
-  checkUser,
   showLoginModal, setShowLoginModal,
   showSignUpModal, setShowSignUpModal
 }) => {

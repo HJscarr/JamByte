@@ -5,11 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
 import getStripe from '@/lib/GetStripe';
-import { useUser } from '@/context/UserContext';
-import { useCookiesContext } from '@/context/CookiesContext';
+import { useAuth } from '@/context/AuthContext';
 import CheckoutHandler from './CheckoutHandler';
 import StockChecker from './StockChecker';
-import { useAuth } from '@/context/AuthContext';
 
 interface CourseProps {
   title: string;
@@ -32,20 +30,18 @@ const CourseCard: React.FC<CourseProps> = ({
   productID, 
   status 
 }) => {
-  const { user } = useUser();
+  const { user, modalState, setModalState } = useAuth();
   const [hasBought, setHasBought] = useState<boolean>(false);
-  const [cookiesSet] = useCookiesContext();
   const [successUrl, setSuccessUrl] = useState<string>('');
-  const auth = useAuth();
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);
   }, []);
 
   useEffect(() => {
-    if (auth.isAuthenticated && auth.user?.profile.email) {
+    if (user && user.profile.email) {
       fetch(
-        `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${auth.user.profile.email}`
+        `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.profile.email}`
       )
         .then((response) => {
           if (!response.ok) throw new Error("Failed to fetch");
@@ -61,7 +57,7 @@ const CourseCard: React.FC<CourseProps> = ({
           console.error("Error fetching course data:", error);
         });
     }
-  }, [auth.isAuthenticated, auth.user, title]);
+  }, [user]);
 
   const handleCheckout = async () => {
     const stripe = await getStripe();
@@ -82,8 +78,8 @@ const CourseCard: React.FC<CourseProps> = ({
       cancelUrl: `${window.location.origin}/Pi-Guard`,
     };
 
-    if (auth.user?.profile.email) {
-      config.customerEmail = auth.user.profile.email;
+    if (user && user.profile.email) {
+      config.customerEmail = user.profile.email;
     }
 
     try {
@@ -111,6 +107,14 @@ const CourseCard: React.FC<CourseProps> = ({
     } catch (error) {
       console.error('Error during checkout:', error);
     }
+  };
+
+  const handleBuyClick = () => {
+    if (!user) {
+      setModalState(prev => ({ ...prev, showLoginModal: true }));
+      return;
+    }
+    handleCheckout();
   };
 
   const getCourseRoute = (courseTitle: string) => {
@@ -164,7 +168,7 @@ const CourseCard: React.FC<CourseProps> = ({
         <div className="relative w-full mt-auto space-y-4 px-12 sm:px-16">
           {showActions ? (
             <>
-              {hasBought || cookiesSet ? (
+              {hasBought ? (
                 <Link href="/lesson" className="block w-full">
                   <button 
                     onClick={(e) => e.stopPropagation()} 
@@ -178,7 +182,7 @@ const CourseCard: React.FC<CourseProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleCheckout();
+                    handleBuyClick();
                   }}
                   className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 py-3 text-base font-medium text-white transition-all duration-300"
                 >

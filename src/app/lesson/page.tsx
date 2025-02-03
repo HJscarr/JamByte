@@ -7,9 +7,7 @@ import LessonDesc from '../../components/LessonDesc';
 import Feedback from '../../components/Feedback';
 import LessonList from '../../components/LessonList';
 import { Bars3Icon } from '@heroicons/react/20/solid';
-import { useCookiesContext } from '../../context/CookiesContext';
-import { useUser } from '../../context/UserContext';
-import { ProgressData } from '../../data/progress';
+import { useAuth } from '../../context/AuthContext';
 import EndOfSeriesModal from '../../components/EndOfSeriesModal';
 
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false });
@@ -19,14 +17,11 @@ const Lesson: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isAIAssistantOpen, setAIAssistantOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [cookiesSet] = useCookiesContext();
-  const { user } = useUser();
+  const { user } = useAuth();
   const currentLesson = lessons[currentIndex] || {};
-  const [progressData, setProgressData] = useState<number[]>([]);
   const [countdown, setCountdown] = useState(0);
   const [countdownInterval, setCountdownInterval] = useState<number | NodeJS.Timeout | null>(null);
   const [showEndOfSeriesModal, setShowEndOfSeriesModal] = useState(false);
-  const [lastUpdateTime, setLastUpdateTime] = useState(0);
   const [open, setOpen] = useState(false);
   const [privateVideoTokens, setPrivateVideoTokens] = useState<Record<string, string>>({});
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
@@ -58,14 +53,14 @@ const Lesson: React.FC = () => {
   };
 
   const fetchPrivateVideoToken = async (playbackId: string) => {
-    if (!user?.email) {
+    if (!user?.profile.email) {
       console.error("No user email available");
       return null;
     }
 
     try {
       const response = await fetch(
-        `https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.email)}&playback_id=${playbackId}`,
+        `https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.profile.email)}&playback_id=${playbackId}`,
         {
           method: 'GET',
           headers: {
@@ -137,57 +132,6 @@ const Lesson: React.FC = () => {
     return `https://stream.mux.com/${lesson.muxid}.m3u8`;
   };
 
-  const preprocessProgress = (data: ProgressData[]): number[] => {
-    const processedData: number[] = [];
-    for (let item of data) {
-      processedData[item.video_index] = item.progress;
-    }
-    return processedData;
-  };
-
-  const fetchUserProgress = async (userEmail: string, courseName: string) => {
-    try {
-      const response = await fetch(`https://mclqp4wgh8.execute-api.eu-west-1.amazonaws.com/Prod?email=${userEmail}&course=${courseName}`);
-      const data = await response.json();
-      setProgressData(preprocessProgress(data));
-    } catch (error) {
-      console.error("Error fetching user progress:", error);
-    }
-  };
-
-  const sendProgressUpdate = async (time: number) => {
-    if (!user?.email || !currentLesson.length) return;
-
-    const [mins, secs] = currentLesson.length.split(":").map(Number);
-    if (mins === 0 && secs === 0) return;
-
-    try {
-      await fetch('https://c27rktve90.execute-api.eu-west-1.amazonaws.com/Prod', {
-        mode: 'cors',
-        method: 'PUT',
-        body: JSON.stringify({
-          user_email: user.email,
-          course_name: "Pi-Guard",
-          video_index: currentIndex + 1,
-          progress: Math.min(1.0, Math.max(0.0, time / (mins * 60 + secs)))
-        }),
-        headers: {
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-      });
-    } catch (error) {
-      console.error("Error sending progress update:", error);
-    }
-  };
-
-  const handleTimeUpdate = (event: any) => {
-    const currentTime = event.target.currentTime;
-    if (currentTime - lastUpdateTime >= 3) {
-      sendProgressUpdate(currentTime);
-      setLastUpdateTime(currentTime);
-    }
-  };
-
   const autoAdvanceToNextVideo = () => {
     if (currentIndex >= lessons.length - 1) {
       setShowEndOfSeriesModal(true);
@@ -247,12 +191,6 @@ const Lesson: React.FC = () => {
     initializeData();
   }, [user]);
 
-  useEffect(() => {
-    if (user?.email) {
-      fetchUserProgress(user.email, "Pi-Guard");
-    }
-  }, [user]);
-
   const videoUrl = getVideoUrl(currentLesson);
 
   return (
@@ -263,7 +201,6 @@ const Lesson: React.FC = () => {
         lessons={lessons} 
         setSelectedLesson={setSelectedLesson} 
         currentIndex={currentIndex} 
-        progress={progressData}
         thumbnails={thumbnails}
       />
       
@@ -277,7 +214,7 @@ const Lesson: React.FC = () => {
         </button>
 
         <div className="ml-auto pt-20 w-full h-3/5 flex flex-col items-center justify-between relative">
-          {isDataLoaded && cookiesSet ? (
+          {isDataLoaded ? (
             <>
               <div className="w-full" style={{ aspectRatio: '16/9' }}>
                 {currentLesson?.muxid && (
@@ -294,7 +231,6 @@ const Lesson: React.FC = () => {
                         playbackId={!currentLesson.private ? currentLesson.muxid : undefined}
                         src={currentLesson.private ? videoUrl : undefined}
                         autoPlay={false}
-                        onTimeUpdate={handleTimeUpdate}
                         onEnded={autoAdvanceToNextVideo}
                         primaryColor="#FFFFFF"
                         secondaryColor="#000000"
@@ -352,22 +288,18 @@ const Lesson: React.FC = () => {
             </div>
 
             <div className="flex flex-row justify-center items-center w-full pt-6">
-              {currentIndex > 0 && (
-                <button 
-                  className="text-white px-5 sm:px-6 py-2 sm:text-sm sm:py-3 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
-                  onClick={goToPreviousVideo}
-                >
+              <button 
+                className="text-white px-5 sm:px-6 py-2 sm:text-sm sm:py-3 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
+                onClick={goToPreviousVideo}
+              >
                   👈&nbsp;Prev
-                </button>
-              )}
-              {currentIndex < lessons.length - 1 && (
-                <button 
-                  className="text-white px-5 sm:px-6 py-2 sm:text-sm sm:py-3 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 ml-4" 
-                  onClick={goToNextVideo}
-                >
-                  Next&nbsp;👉
-                </button>
-              )}
+              </button>
+              <button 
+                className="text-white px-5 sm:px-6 py-2 sm:text-sm sm:py-3 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 ml-4" 
+                onClick={goToNextVideo}
+              >
+                Next&nbsp;👉
+              </button>
             </div>
 
             <div className="flex justify-center items-center w-1/3 pt-4">

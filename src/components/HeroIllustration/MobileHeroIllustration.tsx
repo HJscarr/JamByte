@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { RocketLaunchIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { useCookiesContext } from '@/context/CookiesContext';
 import LazyPlaceholder from '@/components/LazyPlaceholder';
+import { useHasBought } from '@/hooks/useHasBought';
 
 interface TypingAnimationProps {
   messages: string[];
@@ -55,9 +55,9 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 };
 
 const MobileHeroIllustration: React.FC<MobileHeroIllustrationProps> = ({ onLoad }) => {
-  const [cookiesSet] = useCookiesContext();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const { data: hasBought = false } = useHasBought('Pi-Guard');
 
   useEffect(() => {
     if (imageLoaded) {
@@ -105,7 +105,7 @@ const MobileHeroIllustration: React.FC<MobileHeroIllustrationProps> = ({ onLoad 
           Technology education through building exciting electronic devices.
         </p>
         <div className="flex flex-col space-y-3 w-2/4 max-w-xs">
-          {cookiesSet && (
+          {hasBought ? (
             <Link 
               href="/lesson" 
               className="text-sm px-4 py-3 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded-md flex items-center justify-center transition-colors duration-300"
@@ -113,14 +113,15 @@ const MobileHeroIllustration: React.FC<MobileHeroIllustrationProps> = ({ onLoad 
               Start Learning
               <RocketLaunchIcon className="h-5 w-5 ml-2 text-white flex-shrink-0" />
             </Link>
+          ) : (
+            <Link 
+              href="/courses" 
+              className="text-sm px-4 py-3 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded-md flex items-center justify-center transition-colors duration-300"
+            >
+              Browse Courses
+              <ArrowTopRightOnSquareIcon className="h-5 w-5 ml-2 text-white flex-shrink-0" />
+            </Link>
           )}
-          <Link 
-            href="/courses" 
-            className="text-sm px-4 py-3 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded-md flex items-center justify-center transition-colors duration-300"
-          >
-            Browse Courses
-            <ArrowTopRightOnSquareIcon className="h-5 w-5 ml-2 text-white flex-shrink-0" />
-          </Link>
         </div>
       </div>
     </div>

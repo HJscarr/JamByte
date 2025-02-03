@@ -15,11 +15,10 @@ interface LessonListProps {
   lessons: lesson[];
   setSelectedLesson: (index: number) => void;
   currentIndex: number;
-  progress: { [key: number]: number };
   thumbnails: Record<string, string>;
 }
 
-export const LessonList: React.FC<LessonListProps> = ({ open, setOpen, lessons, setSelectedLesson, currentIndex, progress }) => {
+export const LessonList: React.FC<LessonListProps> = ({ open, setOpen, lessons, setSelectedLesson, currentIndex, thumbnails }) => {
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={setOpen}>
@@ -95,12 +94,6 @@ export const LessonList: React.FC<LessonListProps> = ({ open, setOpen, lessons, 
                           <div className="flex items-center mt-1 gap-1">
                             <ClockIcon className="h-4 w-4 text-gray-200" aria-hidden="true" />
                             <p className="text-gray-200">{lesson.length}</p>
-                          </div>
-                          <p className="text-sm text-gray-400">{progress[index] ? `Progress: ${Math.round((progress[index] || 0) * 100)}%` : 'Not Started'}</p>
-
-                          {/* Progress Bar */}
-                          <div className="relative bg-gray-300 mt-1 rounded h-2 w-40">
-                            <div className="absolute left-0 top-0 h-2 rounded bg-secondary" style={{ width: `${(progress[index] || 0) * 100}%` }}></div>
                           </div>
                         </div>
                       </div>
