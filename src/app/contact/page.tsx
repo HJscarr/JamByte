@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import useFadeInOnScroll from "@/components/useFadeInOnScroll";
+import useFadeInOnScroll from "@/hooks/useFadeInOnScroll";
 
 const Contact: React.FC = () => {
   const [responseMessage, setResponseMessage] = useState<string | null>(null);

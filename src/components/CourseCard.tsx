@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
-import getStripe from '@/lib/GetStripe';
+import getStripe from '@/hooks/useStripe';
 import { useAuth } from '@/context/AuthContext';
 import CheckoutHandler from './CheckoutHandler';
 import StockChecker from './StockChecker';

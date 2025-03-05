@@ -66,9 +66,9 @@ export const Navbar = () => {
                         href={item.href}
                         className={classNames(
                           item.current
-                            ? 'bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500'
-                            : 'text-gray-300 hover:bg-clip-text hover:text-transparent hover:bg-gradient-to-r hover:from-pink-500 hover:to-yellow-500',
-                          'rounded-md px-3 py-2 text-lg font-medium transition-all duration-300 ease-in-out'
+                            ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500'
+                            : 'text-gray-300 hover:text-white',
+                          'rounded-md px-3 py-2 text-lg font-medium transition-colors duration-75'
                         )}
                         aria-current={item.current ? 'page' : undefined}
                       >

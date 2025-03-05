@@ -34,4 +34,4 @@ const useFadeInOnScroll = (ref: React.RefObject<HTMLElement>) => {
   return hasBeenVisible;
 };
 
-export default useFadeInOnScroll;
+export default useFadeInOnScroll; 

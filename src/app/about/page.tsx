@@ -1,9 +1,5 @@
-'use client'
-
-import React, { useRef } from 'react';
-import useFadeInOnScroll from '@/components/useFadeInOnScroll';
-import Image from 'next/image'
-import image7 from '@/images/real-life/img7.jpg'
+import Image from 'next/image';
+import image7 from '@/images/real-life/img7.jpg';
 
 const people = [
   {
@@ -29,50 +25,11 @@ const people = [
 ];
 
 export default function About() {
-  const inspiringGenerationRef = useRef(null);
-  const ourTeamRef = useRef(null);
-
-  const isInspiringGenerationVisible = useFadeInOnScroll(inspiringGenerationRef);
-  const isOurTeamVisible = useFadeInOnScroll(ourTeamRef);
- 
   return (
     <div>
-      <div
-        ref={inspiringGenerationRef}
-        className={`relative isolate overflow-hidden bg-gray-900 py-24 sm:py-32`}
-        style={{
-          opacity: isInspiringGenerationVisible ? 1 : 0,
-          transform: isInspiringGenerationVisible ? 'translateY(0)' : 'translateY(20%)',
-          transition: 'opacity 1s ease-out, transform 1s ease-out'
-        }}
-      >
-        <div
-          className="hidden sm:absolute sm:-top-10 sm:right-1/2 sm:-z-10 sm:mr-10 sm:block sm:transform-gpu sm:blur-3xl"
-          aria-hidden="true"
-        >
-          <div
-            className="aspect-[1097/845] w-[68.5625rem] bg-gradient-to-tr from-[#ff4694] to-[#776fff] opacity-20"
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-          />
-        </div>
-        <div
-          className="absolute -top-52 left-1/2 -z-10 -translate-x-1/2 transform-gpu blur-3xl sm:top-[-28rem] sm:ml-16 sm:translate-x-0 sm:transform-gpu"
-          aria-hidden="true"
-        >
-          <div
-            className="aspect-[1097/845] w-[68.5625rem] bg-gradient-to-tr from-[#ff4694] to-[#776fff] opacity-20"
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-          />
-        </div>
+      <div className="relative isolate overflow-hidden bg-gray-900 py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left column - text content */}
             <div className="mx-auto max-w-2xl lg:mx-0">
               <h2 className="text-4xl font-bold tracking-tight text-secondary sm:text-6xl">Inspiring a generation</h2>
               <p className="mt-6 text-lg leading-8 text-gray-300">
@@ -82,8 +39,6 @@ export default function About() {
                 We want to enable the next generation of creators to make a better world for everyone.
               </p>
             </div>
-
-            {/* Right column - image */}
             <div className="relative h-[200px] lg:h-[300px] rounded-xl overflow-hidden">
               <Image
                 src={image7}
@@ -97,10 +52,7 @@ export default function About() {
         </div>
       </div>
 
-      <div 
-        ref={ourTeamRef} 
-        className={`bg-gray-900 py-24 sm:py-32 transition-opacity duration-1000 ${isOurTeamVisible ? 'opacity-100' : 'opacity-0'}`}
-      >
+      <div className="bg-gray-900 py-24 sm:py-32">
         <div className="mx-auto px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-100 sm:text-4xl mb-6">Our team</h2>
           <p className="text-3xl leading-8 text-slate-300 mb-32">

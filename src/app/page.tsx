@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/20/solid";
 import Charity from "@/components/Charity";
 import LazyPlaceholder from "@/components/LazyPlaceholder";
-import useFadeInOnScroll from "@/components/useFadeInOnScroll";
+import useFadeInOnScroll from "@/hooks/useFadeInOnScroll";
 import SignUpBanner from "@/components/SignUpBanner";
 import Photos from "@/components/Photos";
 

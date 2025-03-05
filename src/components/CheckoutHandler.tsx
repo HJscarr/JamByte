@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react';
-import getStripe from '@/lib/GetStripe';
+import { useAuth } from '@/context/AuthContext';
+import getStripe from '@/hooks/useStripe';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline'
-import { useUser } from '@/context/UserContext';
 
 interface CheckoutHandlerProps {
     priceID: string;
@@ -12,7 +12,7 @@ interface CheckoutHandlerProps {
 }
 
 const CheckoutHandler: React.FC<CheckoutHandlerProps> = ({ priceID, successUrl, cancelUrl }) => {
-    const { user } = useUser();
+    const { user } = useAuth();
 
     const handleCheckout = async () => {
         const stripe = await getStripe();
@@ -34,8 +34,8 @@ const CheckoutHandler: React.FC<CheckoutHandlerProps> = ({ priceID, successUrl, 
             cancelUrl: cancelUrl,
         };
 
-        if (user?.email) {
-            config.customerEmail = user.email;
+        if (user?.profile?.email) {
+            config.customerEmail = user.profile.email;
         }
 
         try {

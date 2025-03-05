@@ -3,7 +3,7 @@
 import React from 'react';
 import CourseCard from '../../components/CourseCard';
 import { courses } from '../../data/courses';
-import useFadeInOnScroll from '../../components/useFadeInOnScroll';
+import useFadeInOnScroll from '@/hooks/useFadeInOnScroll';
 
 const CourseWrapper: React.FC<{ course: any, index: number }> = ({ course, index }) => {
   const ref = React.useRef(null);
