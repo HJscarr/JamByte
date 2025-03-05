@@ -1,15 +1,27 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Features } from '../../components/Features'
-import Prerequisites from '../../components/Prerequisites';
-import BoxAndDesc from '../../components/BoxAndDesc';
-import Outcomes from '../../components/Outcomes';
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { Features } from '@/components/Features';
+import Prerequisites from '@/components/Prerequisites';
+import BoxAndDesc from '@/components/BoxAndDesc';
+import Outcomes from '@/components/Outcomes';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { useAuth } from '@/context/AuthContext';
 
-const PiGuard: React.FC = () => {
+interface CourseContentProps {
+  course: {
+    title: string;
+    details: string;
+    imageUrl: string;
+    productID?: string;
+  };
+  courseSlug: string;
+}
+
+export default function CourseContent({ course, courseSlug }: CourseContentProps) {
   const [isAtBottom, setIsAtBottom] = useState(false);
-  
+  const { user } = useAuth();
+
   const checkIfAtBottom = () => {
     const threshold = 100;
     if (typeof window !== 'undefined') {
@@ -57,21 +69,30 @@ const PiGuard: React.FC = () => {
           </div>
         ) : (
           // Scroll to Top Button
-          <div></div>
+          <div onClick={scrollToTop} className="flex items-center justify-center h-8 w-8 bg-white bg-opacity-50 rounded-full animate-bounce">
+            <ChevronDownIcon className="h-6 w-6 text-white transform rotate-180" />
+          </div>
         )}
       </div>
-      <BoxAndDesc/>
-      <Outcomes/>
-      <Features/>
-      <Prerequisites/>
+
+      <BoxAndDesc 
+        title={course.title}
+        description={course.details || ''}
+        imageUrl={course.imageUrl}
+        productID={course.productID}
+      />
+      <Outcomes />
+      <Features />
+      <Prerequisites />
+
       {/* Call-to-Action Section */}
       <div className="bg-gray-900 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="text-center">
+        <div className="text-center pb-12">
           <h2 className="text-3xl leading-9 font-extrabold text-white sm:text-4xl sm:leading-10">
             Ready to start your journey?
           </h2>
           <p className="mt-4 text-lg leading-6 text-gray-200">
-            Unlock your potential with Pi-Guard today!
+            Unlock your potential with {course.title} today!
           </p>
           <button
             onClick={scrollToTop}
@@ -82,7 +103,5 @@ const PiGuard: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-export default PiGuard;
+  );
+} 

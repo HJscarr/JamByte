@@ -273,8 +273,8 @@ const Lesson: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-col lg:flex-row justify-between w-full items-center">
-            <div className="text-center sm:text-left w-full sm:w-auto">
+          <div className="flex flex-row justify-between w-full items-center">
+            <div className="text-left w-1/3">
               <h1 className="text-2xl font-bold text-white pb-2 mt-8 whitespace-nowrap">
                 {currentLesson.title}
               </h1>
@@ -287,22 +287,22 @@ const Lesson: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex flex-row justify-center items-center w-full pt-6">
+            <div className="flex items-center justify-center space-x-4 w-1/3">
               <button 
-                className="text-white px-5 sm:px-6 py-2 sm:text-sm sm:py-3 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
+                className="text-white px-4 py-2 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
                 onClick={goToPreviousVideo}
               >
-                  👈&nbsp;Prev
+                👈&nbsp;Prev
               </button>
               <button 
-                className="text-white px-5 sm:px-6 py-2 sm:text-sm sm:py-3 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 ml-4" 
+                className="text-white px-4 py-2 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
                 onClick={goToNextVideo}
               >
                 Next&nbsp;👉
               </button>
             </div>
 
-            <div className="flex justify-center items-center w-1/3 pt-4">
+            <div className="flex justify-end w-1/3">
               <button 
                 className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white px-5 sm:px-6 py-2 sm:py-3 sm:text-sm rounded" 
                 onClick={() => setAIAssistantOpen(!isAIAssistantOpen)}

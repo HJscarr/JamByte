@@ -1,32 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image"; 
-import Link from "next/link";
-import { StarIcon } from "@heroicons/react/20/solid";
-import { RocketLaunchIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { StarIcon } from '@heroicons/react/20/solid';
+import { RocketLaunchIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
-import CheckoutHandler from "./CheckoutHandler";
-import StockChecker from "./StockChecker";
+import CheckoutHandler from './CheckoutHandler';
+import StockChecker from './StockChecker';
 import { useHasBought } from '@/hooks/useHasBought';
 
-const product = {
-  name: "Pi-Guard",
-  price: "£74",
-  href: "#",
-  images: [
-    {
-      src: "/img/Pi-Guard/PiSpyBox.webp",
-      alt: "A box containing the electronics required to build Pi-Guard.",
-    },
-  ],
-  description: (
-    <>
-      Learn programming, electronics, and networking by creating a home security
-      device. It records audio and video when it detects motion!
-    </>
-  ),
-  highlights: [
+interface BoxAndDescProps {
+  title: string;
+  description: string;
+  imageUrl: string;
+  productID?: string;
+}
+
+function classNames(...classes: any) {
+  return classes.filter(Boolean).join(" ");
+}
+
+export default function BoxAndDesc({ title, description, imageUrl, productID }: BoxAndDescProps) {
+  const { user } = useAuth();
+  const [baseUrl, setBaseUrl] = useState('');
+  const [successUrl, setSuccessUrl] = useState('');
+  const { data: hasBought = false } = useHasBought(title);
+
+  useEffect(() => {
+    setBaseUrl(window.location.origin);
+    setSuccessUrl(`${window.location.origin}/checkout-success`);
+  }, []);
+
+  const highlights = [
     {
       key: "electronics",
       content: "A box of high quality electronics, used to build the device",
@@ -58,25 +64,14 @@ const product = {
       content:
         "Written documents, resources and materials to develop your skills",
     },
-  ],
-  details:
-    'The 6-Pack includes two black, two white, and two heather gray Basic Tees. Sign up for our subscription service and be the first to get new, exciting colors, like our upcoming "Charcoal Gray" limited release.',
-};
+  ];
 
-const reviews = { href: "#", average: 4.5, totalCount: 1 };
+  const reviews = { href: "#", average: 4.5, totalCount: 1 };
 
-function classNames(...classes: any) {
-  return classes.filter(Boolean).join(" ");
-}
-
-export const BoxAndDesc = () => {
-  const [successUrl, setSuccessUrl] = useState<string>('');
-  const { data: hasBought = false } = useHasBought(product.name);
-  const auth = useAuth();
-
-  useEffect(() => {
-    setSuccessUrl(`${window.location.origin}/checkout-success`);
-  }, []);
+  // Use the correct image path for Pi-Guard
+  const displayImageUrl = title === "Pi-Guard" 
+    ? "/img/Pi-Guard/PiSpyBox.webp"
+    : imageUrl;
 
   return (
     <div className="overflow-hidden bg-gray-900 pb-32 mt-6 sm:mt-20 sm:px-40">
@@ -84,9 +79,9 @@ export const BoxAndDesc = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-20 lg:mx-0 lg:max-w-none">
           <div className="overflow-hidden rounded-lg lg:flex lg:items-center lg:justify-center">
             <Image
-              src={product.images[0].src}
-              alt={product.images[0].alt}
-              width={500} 
+              src={displayImageUrl}
+              alt={`${title} course materials`}
+              width={500}
               height={500}
               className="rounded-lg bg-transparent w-full h-auto mt-4 lg:mt-8 lg:w-6/7 sm:pr-12 object-contain"
             />
@@ -95,14 +90,14 @@ export const BoxAndDesc = () => {
           <div className="sm:mt-4">
             <h2 className="sr-only">Product information</h2>
             <h1 className="text-2xl font-bold tracking-tight text-gray-50 sm:text-3xl">
-              {product.name}
+              {title}
             </h1>
             <p className="mt-1 bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text pb-4">
               A JamByte Course
             </p>
             <div className="flex items-center gap-4">
               <p className="text-xl sm:text-3xl tracking-tight text-gray-50">
-                {product.price}
+                £74
               </p>
               <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-2 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
                 Free Shipping
@@ -135,9 +130,11 @@ export const BoxAndDesc = () => {
                 </a>
               </div>
 
-              <div className="pt-4 text-sm text-gray-200">
-                <StockChecker productId="price_1OkwbGGAlR94zWojhzJ8TgdB" />
-              </div>
+              {productID && (
+                <div className="pt-4 text-sm text-gray-200">
+                  <StockChecker productId={productID} />
+                </div>
+              )}
               <div className="pt-7 flex">
                 {hasBought ? (
                   <>
@@ -151,13 +148,13 @@ export const BoxAndDesc = () => {
                       </button>
                     </Link>
                   </>
-                ) : (
+                ) : productID ? (
                   <CheckoutHandler
-                    priceID="price_1QVtp8GAlR94zWojDJgWQxD3"
+                    priceID={productID}
                     successUrl={successUrl}
-                    cancelUrl="https://jambyte.io/Pi-Guard"
+                    cancelUrl={`${baseUrl}/${title.toLowerCase().replace(/\s+/g, '-')}`}
                   />
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -165,7 +162,7 @@ export const BoxAndDesc = () => {
               <h3 className="sr-only">Description</h3>
               <div className="space-y-6">
                 <p className="text-md sm:text-base text-gray-50">
-                  {product.description}
+                  {description}
                 </p>
               </div>
             </div>
@@ -175,7 +172,7 @@ export const BoxAndDesc = () => {
               </h3>
               <div className="mt-2">
                 <ul role="list" className="list-disc space-y-2 pl-4 text-md">
-                  {product.highlights.map((highlight) => (
+                  {highlights.map((highlight) => (
                     <li key={highlight.key} className="text-gray-200">
                       <span className="text-gray-100">{highlight.content}</span>
                     </li>
@@ -188,6 +185,4 @@ export const BoxAndDesc = () => {
       </div>
     </div>
   );
-};
-
-export default BoxAndDesc;
+}

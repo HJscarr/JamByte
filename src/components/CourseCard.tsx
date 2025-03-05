@@ -118,16 +118,7 @@ const CourseCard: React.FC<CourseProps> = ({
   };
 
   const getCourseRoute = (courseTitle: string) => {
-    switch (courseTitle) {
-      case "Pi-Guard":
-        return "/Pi-Guard";
-      case "Rover":
-        return "/Rover";
-      case "Link":
-        return "/Link";
-      default:
-        return "/courses";
-    }
+    return `/${courseTitle.toLowerCase().replace(/\s+/g, '-')}`;
   };
 
   return (
