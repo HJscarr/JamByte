@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import CourseContent from '@/components/CourseContent';
 
+export const runtime = 'edge';
+
 interface CoursePageProps {
   params: {
     course: string;
