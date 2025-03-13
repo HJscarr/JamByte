@@ -16,7 +16,7 @@
     "@headlessui/react": "^2.1.10",
     "@heroicons/react": "^2.1.5",
     "@mux/mux-player": "^3.1.0",
-    "@mux/mux-player-react": "^3.1.0",
+    "@mux/mux-player-react": "^3.3.0",
     "@stripe/stripe-js": "^4.3.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
