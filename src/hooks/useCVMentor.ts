@@ -54,7 +54,7 @@ export const useCV = (): UseCV => {
         },
         body: JSON.stringify({
           file_content: base64Data,
-          content_type: "application/pdf"
+          content_type: "text/plain"
         }),
       });
 
