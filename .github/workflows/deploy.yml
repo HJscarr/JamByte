@@ -41,5 +41,4 @@ jobs:
           CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_ACCOUNT_EMAIL }}
         with:
-          command: pages deploy --branch production
-
+          command: pages deploy --branch main
