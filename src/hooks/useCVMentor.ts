@@ -51,6 +51,7 @@ export const useCV = (): UseCV => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Origin': window.location.origin,
         },
         body: JSON.stringify({
           file_content: base64Data,
