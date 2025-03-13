@@ -42,7 +42,7 @@ export const useCV = (): UseCV => {
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch('https://nx6u70hzeh.execute-api.eu-west-1.amazonaws.com/$default/cv-mentor', {
+      const response = await fetch('https://nx6u70hzeh.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,9 @@ export const useCV = (): UseCV => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
       }
 
       const data: CVAnalysisResponse = await response.json();
