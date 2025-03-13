@@ -1,75 +1,23 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { CloudArrowUpIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { CVProgressSteps } from '@/components/CVProgressSteps';
 import { CVLoadingMessages } from '@/components/CVLoadingMessages';
 import ReactMarkdown from 'react-markdown';
+import { useCV } from '@/hooks/useCVMentor';
 
 export default function CVHelperPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<string | null>(null);
-  const [formattedCV, setFormattedCV] = useState<string | null>(null);
+  const { loading, error, analysis, formattedCV, processCV } = useCV();
 
-  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
-
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setError('File size should be less than 10MB');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      setFile(selectedFile);
-      setAnalysis(null);
-      setFormattedCV(null);
-
-      // Convert file to base64
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Data = reader.result?.toString().split(',')[1];
-
-        // Send to Lambda for direct analysis
-        const response = await fetch('https://hjsxlvbu9j.execute-api.eu-west-1.amazonaws.com/prod/CV-Mentor', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            filename: selectedFile.name,
-            content_type: selectedFile.type,
-            file_content: base64Data
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setAnalysis(data.analysis);
-        setFormattedCV(data.formattedCV);
-        setLoading(false);
-      };
-
-      reader.onerror = () => {
-        throw new Error('Failed to read file');
-      };
-
-      reader.readAsDataURL(selectedFile);
-
-    } catch (err) {
-      console.error('Upload error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to process file. Please try again.');
-      setLoading(false);
-    }
-  }, []);
+    
+    setFile(selectedFile);
+    await processCV(selectedFile);
+  };
 
   return (
     <div className="bg-gray-900 min-h-screen">
