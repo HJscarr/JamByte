@@ -42,7 +42,7 @@ export const useCV = (): UseCV => {
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch('https://nx6u70hzeh.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
+      const response = await fetch('https://nx6u70hzeh.execute-api.eu-west-1.amazonaws.com/$default/cv-mentor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
