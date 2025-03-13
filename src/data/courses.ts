@@ -5,7 +5,7 @@ export const courses = [
         imageUrl: "/img/Pi-Guard/Pi-Guard-Card-Mobile.webp",
         author: "James Scarr",
         duration: "15 Videos",
-        productID: "price_1QVtp8GAlR94zWojDJgWQxD3",
+        productID: "price_1OkwbGGAlR94zWojhzJ8TgdB",
         status: "Available",
         details: `Create a home security device that records audio and video when motion is detected!`,
         showActions: true

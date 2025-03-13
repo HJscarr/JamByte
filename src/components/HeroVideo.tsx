@@ -9,7 +9,7 @@ const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false })
 export const HeroVideo: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row items-center bg-gray-900 w-full px-6 md:w-11/12 sm:px-20 mt-12 md:mt-0 h-auto md:h-screen">
-      <div className="flex-1 p-1 w-full md:w-1/2 md:mr-12" style={{ aspectRatio: '16 / 9' }}>
+      <div className="flex-1 w-full md:w-1/2 md:mr-12" style={{ aspectRatio: '16 / 9', borderRadius: '10px', overflow: 'hidden', display: 'flex' }}>
         <MuxPlayer
           streamType="on-demand"
           playbackId="KJJLyIgjLB7E3lgisx8sVVDmGkkJw2grKUQ1Enxhtd8"
@@ -21,7 +21,6 @@ export const HeroVideo: React.FC = () => {
             height: '100%',
             width: '100%',
             maxWidth: '100%',
-            borderRadius: '4px',
           }}
         />
       </div>

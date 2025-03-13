@@ -132,13 +132,13 @@ export default function BoxAndDesc({ title, description, imageUrl, productID }: 
 
               {productID && (
                 <div className="pt-4 text-sm text-gray-200">
-                  <StockChecker productId={productID} />
+                  <StockChecker title={title} />
                 </div>
               )}
               <div className="pt-7 flex">
                 {hasBought ? (
                   <>
-                    <Link href="/lesson">
+                    <Link href={`/courses/${title.toLowerCase().replace(/\s+/g, '-')}/lesson`}>
                       <button
                         type="button"
                         className="flex-shrink-0 flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 w-32 sm:w-36 py-3 text-xs sm:text-sm font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

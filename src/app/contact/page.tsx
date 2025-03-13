@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import useFadeInOnScroll from "@/hooks/useFadeInOnScroll";
 
 const Contact: React.FC = () => {
