@@ -1,0 +1,42 @@
+name: Deploy App to Production
+
+on:
+  release:
+    types: 
+      - published
+  workflow_dispatch:
+
+env:
+  NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+  NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ vars.NEXT_PUBLIC_COGNITO_CLIENT_ID }}
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+  NEXT_PUBLIC_STRIPE_PRICE_ID: ${{ vars.NEXT_PUBLIC_STRIPE_PRICE_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      # Setup
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      
+      # Build and deploy the web app
+      - name: Install dependencies
+        run: pnpm install          
+      - name: Build web app
+        run: pnpm pages:build
+        env:
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ vars.NEXT_PUBLIC_COGNITO_CLIENT_ID }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_STRIPE_PRICE_ID: ${{ vars.NEXT_PUBLIC_STRIPE_PRICE_ID }}
+      - name: Deploy web app
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages deploy --branch production
+
