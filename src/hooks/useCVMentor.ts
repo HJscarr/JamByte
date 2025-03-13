@@ -41,12 +41,16 @@ export const useCV = (): UseCV => {
         reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsDataURL(file);
       });
+      
+      console.log("This is the JSON base64Data: " + JSON.stringify({
+        file_content: base64Data,
+        content_type: file.type
+      }));
 
       const response = await fetch('https://nx6u70hzeh.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({
           file_content: base64Data,
