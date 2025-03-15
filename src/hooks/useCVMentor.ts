@@ -53,6 +53,7 @@ export const useCV = (): UseCV => {
           'Content-Type': 'application/json',
           'Origin': window.location.origin,
         },
+
         body: JSON.stringify({
           file_content: base64Data,
           content_type: "text/plain"
