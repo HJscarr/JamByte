@@ -86,7 +86,7 @@ const Hero: React.FC = () => {
         <p className="text-xl md:text-xl mb-6 max-w-sm mx-auto leading-tight">
           <span className="text-white">Technology education through building exciting electronic devices.</span>        
         </p>
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center">
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center mb-8 md:mb-0">
           {hasBought ? (
             <Link href="/courses/pi-guard/lesson" className={`${isMobile ? 'text-sm px-2 py-2' : 'text-base md:px-4 md:py-3'} bg-gradient-to-r rounded from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 flex items-center justify-center w-full md:w-auto whitespace-nowrap`}>
               Start Learning
@@ -124,7 +124,7 @@ const Hero: React.FC = () => {
                 height: '100%', 
                 width: '100%',
                 transform: 'scale(0.8)',
-                marginTop: '2rem'
+                marginTop: '6rem'
               }}
             />
           ) : (
