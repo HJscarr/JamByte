@@ -3,27 +3,10 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { RocketLaunchIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import dynamic from 'next/dynamic';
+import Lottie from 'lottie-react';
+import desktopAnimation from '@/images/lottie/Desktop-Hero.json';
+import mobileAnimation from '@/images/lottie/Mobile-Hero.json';
 import { useHasBought } from '@/hooks/useHasBought';
-
-// Dynamically import illustrations with no SSR
-const HeroIllustration = dynamic(() => import('./HeroIllustration/HeroIllustration'), {
-  ssr: false,
-  loading: () => (
-    <div className="animate-pulse bg-gray-800 w-full h-[600px] flex items-center justify-center">
-      <div className="text-gray-400">Loading illustration...</div>
-    </div>
-  ),
-});
-
-const MobileHeroIllustration = dynamic(() => import('./HeroIllustration/MobileHeroIllustration'), {
-  ssr: false,
-  loading: () => (
-    <div className="animate-pulse bg-gray-800 w-full h-[400px] flex items-center justify-center">
-      <div className="text-gray-400">Loading illustration...</div>
-    </div>
-  ),
-});
 
 interface TypingAnimationProps {
   messages: string[];
@@ -59,7 +42,7 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 
   return (
     <>
-      <span className="text-white">{articles[index]} </span>
+      <span className="text-white">{articles[index]}&nbsp;</span>
       <span className="bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text">
         {messages[index].substring(0, subIndex)}
         <span className="opacity-50">|</span>
@@ -87,18 +70,20 @@ const Hero: React.FC = () => {
     };
   }, []);
 
-  const illustrationContentDesktop = (
-    <div className="container mx-auto text-center pt-14 relative z-10 p-2 flex flex-col justify-center h-full">
-      <div className="w-11/12 md:w-full mx-auto">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-2">
-          <span className="text-white">BECOME </span>
-          <TypingAnimation 
-            messages={['INVENTOR', 'CREATOR', 'PROGRAMMER']}
-            articles={['AN', 'A', 'A']}
-          />
+  const heroContent = (
+    <div className="container mx-auto text-center p-2 flex flex-col justify-start">
+      <div className="w-11/12 md:w-3/4 lg:w-2/3 mx-auto">
+        <h1 className="text-4xl lg:text-5xl font-bold mb-2 flex flex-col items-center gap-0 md:gap-2">
+          <span className="text-white block mb-0">BECOME</span>
+          <div className="flex items-center justify-center -mt-1 md:mt-0">
+            <TypingAnimation 
+              messages={['INVENTOR', 'CREATOR', 'PROGRAMMER']}
+              articles={['AN', 'A', 'A']}
+            />
+          </div>
         </h1>
 
-        <p className="text-xl md:text-lg mb-8">
+        <p className="text-xl md:text-xl mb-6 max-w-sm mx-auto leading-tight">
           <span className="text-white">Technology education through building exciting electronic devices.</span>        
         </p>
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center">
@@ -127,23 +112,38 @@ const Hero: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-center">
-      <div className="w-full lg:w-5/7 mt-0 md:mt-[-120px] pb-20 flex items-center justify-center">
-        <Suspense fallback={
-          <div className="animate-pulse bg-gray-800 w-full h-[600px] flex items-center justify-center">
-            <div className="text-gray-400">Loading illustration...</div>
-          </div>
-        }>
+    <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-start h-[90vh]">
+      <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full">
+        <div className="absolute inset-x-0 top-0 bottom-0 z-0">
           {isMobile ? (
-            <div className="w-full mt-[-150px]"> {/* Added margin-top for mobile only */}
-              <MobileHeroIllustration />
-            </div>
+            <Lottie
+              animationData={mobileAnimation}
+              loop={true}
+              className="w-full h-full"
+              style={{ 
+                height: '100%', 
+                width: '100%',
+                transform: 'scale(0.8)',
+                marginTop: '2rem'
+              }}
+            />
           ) : (
-            <HeroIllustration>
-              {illustrationContentDesktop}
-            </HeroIllustration>
+            <Lottie
+              animationData={desktopAnimation}
+              loop={true}
+              className="w-full h-full"
+              style={{ 
+                height: '100%', 
+                width: '100%',
+                transform: 'scale(1)',
+                marginTop: '-2rem'
+              }}
+            />
           )}
-        </Suspense>
+        </div>
+        <div className="relative z-10 w-full mt-4 md:mt-8">
+          {heroContent}
+        </div>
       </div>
     </div>
   );
