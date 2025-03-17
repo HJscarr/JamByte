@@ -141,7 +141,7 @@ const Hero: React.FC = () => {
             />
           )}
         </div>
-        <div className="relative z-10 w-full mt-4 md:mt-8">
+        <div className="relative z-10 w-full -mt-6 md:mt-8">
           {heroContent}
         </div>
       </div>
