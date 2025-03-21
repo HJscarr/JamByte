@@ -95,7 +95,7 @@ const CourseCard: React.FC<CourseProps> = ({
             <h2 className="text-2xl font-bold text-white">{title}</h2>
           )}
           <p className="mt-2 bg-gradient-to-r from-secondary to-red-400 text-transparent bg-clip-text">
-            {description}
+            A JamByte Course
           </p>
         </div>
 
