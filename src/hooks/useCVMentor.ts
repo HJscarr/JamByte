@@ -47,7 +47,7 @@ export const useCV = (): UseCV => {
         content_type: file.type
       }));
 
-      const response = await fetch('https://y84a8k5o66.execute-api.eu-west-1.amazonaws.com/cv-mentor-test', {
+      const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
