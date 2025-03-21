@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Image from 'next/image';
 
 interface AuthComponentProps {
   showLoginModal: boolean;
@@ -96,7 +97,18 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-2xl font-bold mb-4">Sign In</h2>
+            <div className="flex justify-center mb-2">
+              <div className="w-16 h-16">
+                <Image
+                  src="/img/jambyte_logo.webp"
+                  alt="JamByte Logo"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-center">Sign In</h2>
             <form onSubmit={handleSignIn}>
               <input
                 type="email"
@@ -148,7 +160,18 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-2xl font-bold mb-4">Create Account</h2>
+            <div className="flex justify-center mb-2">
+              <div className="w-16 h-16">
+                <Image
+                  src="/img/jambyte_logo.webp"
+                  alt="JamByte Logo"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
             <form onSubmit={handleSignUp}>
               <input
                 type="text"
@@ -200,8 +223,19 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-2xl font-bold mb-4">Verify Your Account</h2>
-            <p className="mb-4">Please enter the verification code sent to your email.</p>
+            <div className="flex justify-center mb-2">
+              <div className="w-16 h-16">
+                <Image
+                  src="/img/jambyte_logo.webp"
+                  alt="JamByte Logo"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-center">Verify Your Account</h2>
+            <p className="mb-4 text-center">Please enter the verification code sent to your email.</p>
             <form onSubmit={handleVerification}>
               <input
                 type="text"
