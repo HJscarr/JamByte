@@ -73,7 +73,7 @@ const Hero: React.FC = () => {
   const heroContent = (
     <div className="container mx-auto text-center p-2 flex flex-col justify-start">
       <div className="w-11/12 md:w-3/4 lg:w-2/3 mx-auto">
-        <h1 className="text-4xl lg:text-5xl font-bold mb-2 flex flex-col items-center gap-0 md:gap-2">
+        <h1 className="text-4xl lg:text-5xl font-bold mb-2 flex flex-col md:flex-row items-center justify-center gap-0 md:gap-2">
           <span className="text-white block mb-0">BECOME</span>
           <div className="flex items-center justify-center -mt-1 md:mt-0">
             <TypingAnimation 
@@ -135,8 +135,8 @@ const Hero: React.FC = () => {
               style={{ 
                 height: '100%', 
                 width: '100%',
-                transform: 'scale(1)',
-                marginTop: '-2rem'
+                transform: 'scale(1.1) translateX(1.2rem)',
+                marginTop: '-4rem'
               }}
             />
           )}
