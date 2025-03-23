@@ -112,7 +112,7 @@ const Hero: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-start h-[90vh]">
+    <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-start h-[calc(100vh-4rem)]">
       <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full">
         <div className="absolute inset-x-0 top-0 bottom-0 z-0">
           {isMobile ? (
@@ -131,17 +131,17 @@ const Hero: React.FC = () => {
             <Lottie
               animationData={desktopAnimation}
               loop={true}
-              className="w-full h-full"
+              className="w-full h-full z-0"
               style={{ 
                 height: '100%', 
                 width: '100%',
                 transform: 'scale(1.1) translateX(1.2rem)',
-                marginTop: '-4rem'
+                marginTop: '-6rem'
               }}
             />
           )}
         </div>
-        <div className="relative z-10 w-full -mt-6 md:mt-8">
+        <div className="relative z-[1] w-full mt-4 md:mt-8">
           {heroContent}
         </div>
       </div>

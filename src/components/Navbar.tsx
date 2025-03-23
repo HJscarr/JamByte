@@ -33,7 +33,7 @@ export const Navbar = () => {
     <Disclosure as="nav" className={`w-full z-50 transition duration-300 ease-in-out ${isScrolled ? 'bg-opacity-90 bg-gray-transparent' : 'bg-transparent'}`}>
       {({ open }) => (
         <>
-          <div className="mx-auto max-w-xs md:max-w-7xl sm:px-6 lg:px-8 z-40">
+          <div className="mx-auto max-w-xs md:max-w-7xl sm:px-6 lg:px-8 relative z-50">
             <div className="relative flex h-40 items-center justify-between">
               <div className="flex flex-1 items-center justify-between sm:items-center sm:justify-start">
                 <div className="flex items-center">
