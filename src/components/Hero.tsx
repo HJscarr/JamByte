@@ -131,15 +131,17 @@ const Hero: React.FC = () => {
             <Lottie
               animationData={desktopAnimation}
               loop={true}
-              className="w-full h-full z-0 transform scale-110 2xl:scale-90 translate-x-5 -mt-16 2xl:-mt-56"
+              className="w-full h-full z-0"
               style={{ 
                 height: '100%', 
-                width: '100%'
+                width: '100%',
+                transform: 'scale(1.1) translateX(1.3rem)',
+                marginTop: '-8rem'
               }}
             />
           )}
         </div>
-        <div className="relative z-[1] w-full -mt-2 md:mt-16">
+        <div className="relative z-[1] w-full -mt-2 md:mt-8">
           {heroContent}
         </div>
       </div>
