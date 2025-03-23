@@ -73,7 +73,7 @@ const Hero: React.FC = () => {
   const heroContent = (
     <div className="container mx-auto text-center p-2 flex flex-col justify-start">
       <div className="w-11/12 md:w-3/4 lg:w-2/3 mx-auto">
-        <h1 className="text-4xl lg:text-5xl font-bold mb-2 flex flex-col md:flex-row items-center justify-center gap-0 md:gap-2">
+        <h1 className="text-4xl lg:text-5xl 2xl:text-6xl font-bold mb-2 flex flex-col md:flex-row items-center justify-center gap-0 md:gap-2">
           <span className="text-white block mb-0">BECOME</span>
           <div className="flex items-center justify-center -mt-1 md:mt-0">
             <TypingAnimation 
@@ -83,7 +83,7 @@ const Hero: React.FC = () => {
           </div>
         </h1>
 
-        <p className="text-xl md:text-xl mb-6 max-w-sm mx-auto leading-tight">
+        <p className="text-xl md:text-xl 2xl:text-2xl mb-6 max-w-sm mx-auto leading-tight">
           <span className="text-white">Technology education through building exciting electronic devices.</span>        
         </p>
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center mb-8 md:mb-0">
@@ -124,24 +124,22 @@ const Hero: React.FC = () => {
                 height: '100%', 
                 width: '100%',
                 transform: 'scale(0.8)',
-                marginTop: '8rem'
+                marginTop: '8rem',
               }}
             />
           ) : (
             <Lottie
               animationData={desktopAnimation}
               loop={true}
-              className="w-full h-full z-0"
+              className="w-full h-full z-0 transform scale-110 2xl:scale-90 translate-x-5 -mt-16 2xl:-mt-56"
               style={{ 
                 height: '100%', 
-                width: '100%',
-                transform: 'scale(1.1) translateX(1.3rem)',
-                marginTop: '-8rem'
+                width: '100%'
               }}
             />
           )}
         </div>
-        <div className="relative z-[1] w-full -mt-2 md:mt-8">
+        <div className="relative z-[1] w-full -mt-2 md:mt-16">
           {heroContent}
         </div>
       </div>
