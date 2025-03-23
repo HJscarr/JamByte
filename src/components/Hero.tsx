@@ -124,7 +124,7 @@ const Hero: React.FC = () => {
                 height: '100%', 
                 width: '100%',
                 transform: 'scale(0.8)',
-                marginTop: '6rem'
+                marginTop: '8rem'
               }}
             />
           ) : (
@@ -135,13 +135,13 @@ const Hero: React.FC = () => {
               style={{ 
                 height: '100%', 
                 width: '100%',
-                transform: 'scale(1.1) translateX(1.2rem)',
-                marginTop: '-6rem'
+                transform: 'scale(1.1) translateX(1.3rem)',
+                marginTop: '-8rem'
               }}
             />
           )}
         </div>
-        <div className="relative z-[1] w-full mt-4 md:mt-8">
+        <div className="relative z-[1] w-full -mt-2 md:mt-8">
           {heroContent}
         </div>
       </div>
