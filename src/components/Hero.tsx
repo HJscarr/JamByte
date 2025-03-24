@@ -125,7 +125,7 @@ const Hero: React.FC = () => {
                 height: '100%', 
                 width: '100%',
                 transform: 'scale(0.8)',
-                marginTop: '2rem',
+                marginTop: '5rem',
               }}
             />
           ) : (
