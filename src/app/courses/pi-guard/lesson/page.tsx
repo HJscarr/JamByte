@@ -216,7 +216,7 @@ const Lesson: React.FC = () => {
         <div className="ml-auto pt-20 w-full h-3/5 flex flex-col items-center justify-between relative">
           {isDataLoaded ? (
             <>
-              <div className="w-full" style={{ aspectRatio: '16/9' }}>
+              <div className="w-full" style={{ aspectRatio: '16/9', borderRadius: '10px', overflow: 'hidden' }}>
                 {currentLesson?.muxid && (
                   <>
                     {!videoUrl ? (
