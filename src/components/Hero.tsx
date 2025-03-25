@@ -137,26 +137,33 @@ const Hero: React.FC = () => {
               src={mobileAnimation}
               loop
               autoplay
-              className="w-full h-full scale-[0.95] mt-32"
+              className="w-full h-full scale-[0.90] mt-32"
               renderConfig={{
                 devicePixelRatio: window.devicePixelRatio || 1,
                 autoResize: true,
               }}
             />
           ) : (
-            <div className="relative w-full h-full flex items-center justify-center -translate-y-10">
-              <DotLottieReact
-                src={desktopAnimation}
-                loop
-                autoplay
-                dotLottieRefCallback={dotLottieRefCallback}
-                className="w-[120%] h-[120%] -translate-y-[8%] translate-x-[1.8%] 2xl:scale-75 2xl:-translate-y-[25%]"
-                renderConfig={{
-                  devicePixelRatio: window.devicePixelRatio || 1,
-                  autoResize: true,
-                }}
-              />
-            </div>
+            <div className="relative w-full h-full flex items-center justify-center">
+  <DotLottieReact
+    src={desktopAnimation}
+    loop
+    autoplay
+    dotLottieRefCallback={dotLottieRefCallback}
+    useFrameInterpolation={false}
+    className="absolute"
+    renderConfig={{
+      devicePixelRatio: window.devicePixelRatio || 1,
+      autoResize: true
+    }}
+    style={{ 
+      width: '120vw',
+      height: '120vh',
+      top: '-10%',
+      left: '0',
+    }}
+  />
+</div>
           )}
         </div>
         <div className="relative z-[1] w-full -mt-2 md:mt-16 2xl:mt-32">
