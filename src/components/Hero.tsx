@@ -74,14 +74,24 @@ const Hero: React.FC = () => {
   const heroContent = (
     <div className="container mx-auto text-center p-2 flex flex-col justify-start">
       <div className="w-11/12 md:w-3/4 lg:w-2/3 mx-auto">
-        <h1 className="text-4xl lg:text-4xl 2xl:text-5xl font-bold mb-2 flex flex-col items-center justify-center gap-0">
-          <span className="text-white block mb-0">WHAT WILL</span>
-          <div className="flex items-center justify-center">
-            <span className="text-white mr-2">YOU</span>
+        <h1 className="text-4xl lg:text-4xl 2xl:text-5xl font-bold mb-2">
+          <div className="hidden md:flex items-center justify-center">
+            <span className="text-white">WHAT WILL</span>
+            <span className="text-white mx-[2px]">YOU</span>
             <TypingAnimation 
               messages={['BUILD?', 'CREATE?', 'ENGINEER?']}
               articles={['', '', '']}
             />
+          </div>
+          <div className="flex md:hidden flex-col items-center justify-center gap-0">
+            <span className="text-white block mb-0">WHAT WILL</span>
+            <div className="flex items-center justify-center">
+              <span className="text-white mr-[2px]">YOU</span>
+              <TypingAnimation 
+                messages={['BUILD?', 'CREATE?', 'ENGINEER?']}
+                articles={['', '', '']}
+              />
+            </div>
           </div>
         </h1>
 
@@ -122,30 +132,18 @@ const Hero: React.FC = () => {
               src={mobileAnimation}
               loop
               autoplay
-              className="w-full h-full"
-              style={{ 
-                height: '100%', 
-                width: '100%',
-                transform: 'scale(0.8)',
-                marginTop: '5rem',
-              }}
+              className="w-full h-full scale-[0.95] mt-32"
             />
           ) : (
             <DotLottieReact
               src={desktopAnimation}
               loop
               autoplay
-              className="w-full h-full z-0"
-              style={{ 
-                height: '100%', 
-                width: '100%',
-                transform: 'scale(1.1) translateX(1.3rem)',
-                marginTop: '-8rem'
-              }}
+              className="w-[110%] h-[110%] z-0 -mt-28 -ml-8 2xl:scale-80 2xl:-mt-64 2xl:-ml-16"
             />
           )}
         </div>
-        <div className="relative z-[1] w-full -mt-2 md:mt-8">
+        <div className="relative z-[1] w-full -mt-2 md:mt-16 2xl:mt-32">
           {heroContent}
         </div>
       </div>
