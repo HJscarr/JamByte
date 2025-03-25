@@ -32,6 +32,9 @@ const nextConfig = {
     config.module.rules.push({
       test: /\.lottie$/,
       type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[hash][ext]',
+      },
     });
 
     return config;

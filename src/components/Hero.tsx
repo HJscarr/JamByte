@@ -139,7 +139,7 @@ const Hero: React.FC = () => {
               src={desktopAnimation}
               loop
               autoplay
-              className="w-[110%] h-[110%] z-0 -mt-18 -ml-8 2xl:scale-80 2xl:-mt-64 2xl:-ml-16"
+              className="absolute w-[110%] h-[110%] z-0 top-0 left-1/2 transform -translate-x-[580px] -translate-y-28 2xl:scale-80 2xl:-translate-y-64"
             />
           )}
         </div>
