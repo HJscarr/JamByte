@@ -125,8 +125,8 @@ const Hero: React.FC = () => {
 
   return (
     <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-start h-[calc(100vh-4rem)]">
-      <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full">
-        <div className="absolute inset-x-0 top-0 bottom-0 z-0">
+      <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
           {isMobile ? (
             <DotLottieReact
               src={mobileAnimation}
@@ -135,12 +135,14 @@ const Hero: React.FC = () => {
               className="w-full h-full scale-[0.95] mt-32"
             />
           ) : (
-            <DotLottieReact
-              src={desktopAnimation}
-              loop
-              autoplay
-              className="absolute w-[110%] h-[110%] z-0 top-0 left-1/2 transform -translate-x-[580px] -translate-y-28 2xl:scale-80 2xl:-translate-y-64"
-            />
+            <div className="relative w-full h-full flex items-center justify-center">
+              <DotLottieReact
+                src={desktopAnimation}
+                loop
+                autoplay
+                className="w-[120%] h-[120%] -translate-y-[15%] -translate-x-[10%] 2xl:scale-75 2xl:-translate-y-[25%]"
+              />
+            </div>
           )}
         </div>
         <div className="relative z-[1] w-full -mt-2 md:mt-16 2xl:mt-32">
