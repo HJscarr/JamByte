@@ -3,9 +3,10 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { RocketLaunchIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import Lottie from 'lottie-react';
-import desktopAnimation from '@/images/lottie/Desktop-Hero.json';
-import mobileAnimation from '@/images/lottie/Mobile-Hero.json';
+import desktopAnimation from '@/images/lottie/Desktop-Hero.lottie';
+import mobileAnimation from '@/images/lottie/Mobile-Hero.lottie';
 import { useHasBought } from '@/hooks/useHasBought';
 
 interface TypingAnimationProps {
@@ -117,9 +118,10 @@ const Hero: React.FC = () => {
       <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full">
         <div className="absolute inset-x-0 top-0 bottom-0 z-0">
           {isMobile ? (
-            <Lottie
-              animationData={mobileAnimation}
-              loop={true}
+            <DotLottieReact
+              src={mobileAnimation}
+              loop
+              autoplay
               className="w-full h-full"
               style={{ 
                 height: '100%', 
@@ -129,9 +131,10 @@ const Hero: React.FC = () => {
               }}
             />
           ) : (
-            <Lottie
-              animationData={desktopAnimation}
-              loop={true}
+            <DotLottieReact
+              src={desktopAnimation}
+              loop
+              autoplay
               className="w-full h-full z-0"
               style={{ 
                 height: '100%', 

@@ -28,6 +28,12 @@ const nextConfig = {
       { module: /node_modules\/punycode/ },
     ];
 
+    // Add support for .lottie files
+    config.module.rules.push({
+      test: /\.lottie$/,
+      type: 'asset/resource',
+    });
+
     return config;
   },
   swcMinify: true,
