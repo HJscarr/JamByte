@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { RocketLaunchIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact, DotLottie } from '@lottiefiles/dotlottie-react';
 import Lottie from 'lottie-react';
 import desktopAnimation from '@/images/lottie/Desktop-Hero.lottie';
 import mobileAnimation from '@/images/lottie/Mobile-Hero.lottie';
@@ -55,7 +55,12 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 const Hero: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const { data: hasBought = false } = useHasBought('Pi-Guard');
+
+  const dotLottieRefCallback = (dotLottieInstance: DotLottie | null) => {
+    setDotLottie(dotLottieInstance);
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -133,14 +138,23 @@ const Hero: React.FC = () => {
               loop
               autoplay
               className="w-full h-full scale-[0.95] mt-32"
+              renderConfig={{
+                devicePixelRatio: window.devicePixelRatio || 1,
+                autoResize: true,
+              }}
             />
           ) : (
-            <div className="relative w-full h-full flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center -translate-y-10">
               <DotLottieReact
                 src={desktopAnimation}
                 loop
                 autoplay
-                className="w-[120%] h-[120%] -translate-y-[3%] translate-x-[1.8%] 2xl:scale-75 2xl:-translate-y-[25%]"
+                dotLottieRefCallback={dotLottieRefCallback}
+                className="w-[120%] h-[120%] -translate-y-[8%] translate-x-[1.8%] 2xl:scale-75 2xl:-translate-y-[25%]"
+                renderConfig={{
+                  devicePixelRatio: window.devicePixelRatio || 1,
+                  autoResize: true,
+                }}
               />
             </div>
           )}
