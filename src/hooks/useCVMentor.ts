@@ -28,31 +28,6 @@ export const useCV = (): UseCV => {
       case 'application/pdf':
         return new Blob([arrayBuffer], { type: 'application/pdf' });
       
-      case 'text/plain':
-        const text = new TextDecoder().decode(arrayBuffer);
-        const textPdfDoc = await PDFDocument.create();
-        let textPage = textPdfDoc.addPage();
-        const { height } = textPage.getSize();
-        const fontSize = 12;
-        const lines = text.split('\n');
-        let y = height - 50;
-        
-        lines.forEach(line => {
-          if (y < 50) {
-            textPage = textPdfDoc.addPage();
-            y = height - 50;
-          }
-          textPage.drawText(line, {
-            x: 50,
-            y,
-            size: fontSize,
-          });
-          y -= fontSize + 2;
-        });
-        
-        const pdfBytes = await textPdfDoc.save();
-        return new Blob([pdfBytes], { type: 'application/pdf' });
-      
       case 'application/msword':
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         const result = await mammoth.convertToHtml({ arrayBuffer });
@@ -101,13 +76,12 @@ export const useCV = (): UseCV => {
     // File type validation
     const validTypes = [
       'application/pdf',
-      'text/plain',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
     
     if (!validTypes.includes(file.type)) {
-      setError('Unsupported file type. Please upload a PDF or text file.');
+      setError('Please upload a PDF or Word document.');
       return;
     }
 
