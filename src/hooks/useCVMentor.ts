@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { PDFDocument, PDFPage } from 'pdf-lib';
 import mammoth from 'mammoth';
+import pdfToText from 'react-pdftotext';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -21,45 +21,18 @@ export const useCV = (): UseCV => {
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [formattedCV, setFormattedCV] = useState<string | null>(null);
 
-  const convertToPDF = async (file: File): Promise<Blob> => {
-    const arrayBuffer = await file.arrayBuffer();
-    
+  const extractText = async (file: File): Promise<string> => {
     switch (file.type) {
       case 'application/pdf':
-        return new Blob([arrayBuffer], { type: 'application/pdf' });
+        // Extract text from PDF using react-pdftotext
+        return await pdfToText(file);
       
       case 'application/msword':
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        const html = result.value;
-        
-        // Create a temporary div to parse HTML
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        
-        // Create PDF
-        const wordPdfDoc = await PDFDocument.create();
-        let wordPage = wordPdfDoc.addPage();
-        let currentY = wordPage.getSize().height - 50;
-        
-        // Process each paragraph
-        const paragraphs = Array.from(div.getElementsByTagName('p'));
-        for (const p of paragraphs) {
-          if (currentY < 50) {
-            wordPage = wordPdfDoc.addPage();
-            currentY = wordPage.getSize().height - 50;
-          }
-          
-          wordPage.drawText(p.textContent || '', {
-            x: 50,
-            y: currentY,
-            size: 12,
-          });
-          currentY -= 14;
-        }
-        
-        const wordPdfBytes = await wordPdfDoc.save();
-        return new Blob([wordPdfBytes], { type: 'application/pdf' });
+        // Convert Word to text using mammoth
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        return result.value;
       
       default:
         throw new Error('Unsupported file type');
@@ -91,21 +64,10 @@ export const useCV = (): UseCV => {
       setAnalysis(null);
       setFormattedCV(null);
 
-      // Convert file to PDF
-      const pdfBlob = await convertToPDF(file);
+      // Extract text from the file
+      const text = await extractText(file);
       
-      // Convert PDF to base64
-      const base64Data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = reader.result?.toString().split(',')[1];
-          if (base64) resolve(base64);
-          else reject(new Error('Failed to convert file to base64'));
-        };
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(pdfBlob);
-      });
-
+      // Send text to backend
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
         headers: {
@@ -113,8 +75,8 @@ export const useCV = (): UseCV => {
           'Origin': window.location.origin,
         },
         body: JSON.stringify({
-          file_content: base64Data,
-          content_type: 'application/pdf' // Always send as PDF
+          text_content: text,
+          content_type: file.type
         }),
       });
 
