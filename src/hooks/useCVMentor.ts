@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { PDFDocument, PDFPage } from 'pdf-lib';
+import mammoth from 'mammoth';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -18,6 +20,76 @@ export const useCV = (): UseCV => {
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [formattedCV, setFormattedCV] = useState<string | null>(null);
+
+  const convertToPDF = async (file: File): Promise<Blob> => {
+    const arrayBuffer = await file.arrayBuffer();
+    
+    switch (file.type) {
+      case 'application/pdf':
+        return new Blob([arrayBuffer], { type: 'application/pdf' });
+      
+      case 'text/plain':
+        const text = new TextDecoder().decode(arrayBuffer);
+        const textPdfDoc = await PDFDocument.create();
+        let textPage = textPdfDoc.addPage();
+        const { height } = textPage.getSize();
+        const fontSize = 12;
+        const lines = text.split('\n');
+        let y = height - 50;
+        
+        lines.forEach(line => {
+          if (y < 50) {
+            textPage = textPdfDoc.addPage();
+            y = height - 50;
+          }
+          textPage.drawText(line, {
+            x: 50,
+            y,
+            size: fontSize,
+          });
+          y -= fontSize + 2;
+        });
+        
+        const pdfBytes = await textPdfDoc.save();
+        return new Blob([pdfBytes], { type: 'application/pdf' });
+      
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        const html = result.value;
+        
+        // Create a temporary div to parse HTML
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        
+        // Create PDF
+        const wordPdfDoc = await PDFDocument.create();
+        let wordPage = wordPdfDoc.addPage();
+        let currentY = wordPage.getSize().height - 50;
+        
+        // Process each paragraph
+        const paragraphs = Array.from(div.getElementsByTagName('p'));
+        for (const p of paragraphs) {
+          if (currentY < 50) {
+            wordPage = wordPdfDoc.addPage();
+            currentY = wordPage.getSize().height - 50;
+          }
+          
+          wordPage.drawText(p.textContent || '', {
+            x: 50,
+            y: currentY,
+            size: 12,
+          });
+          currentY -= 14;
+        }
+        
+        const wordPdfBytes = await wordPdfDoc.save();
+        return new Blob([wordPdfBytes], { type: 'application/pdf' });
+      
+      default:
+        throw new Error('Unsupported file type');
+    }
+  };
 
   const processCV = async (file: File) => {
     // File size validation
@@ -45,6 +117,10 @@ export const useCV = (): UseCV => {
       setAnalysis(null);
       setFormattedCV(null);
 
+      // Convert file to PDF
+      const pdfBlob = await convertToPDF(file);
+      
+      // Convert PDF to base64
       const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -53,13 +129,8 @@ export const useCV = (): UseCV => {
           else reject(new Error('Failed to convert file to base64'));
         };
         reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(pdfBlob);
       });
-      
-      console.log("This is the JSON base64Data: " + JSON.stringify({
-        file_content: base64Data,
-        content_type: file.type
-      }));
 
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
@@ -69,7 +140,7 @@ export const useCV = (): UseCV => {
         },
         body: JSON.stringify({
           file_content: base64Data,
-          content_type: file.type
+          content_type: 'application/pdf' // Always send as PDF
         }),
       });
 
