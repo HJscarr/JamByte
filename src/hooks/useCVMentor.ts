@@ -20,8 +20,22 @@ export const useCV = (): UseCV => {
   const [formattedCV, setFormattedCV] = useState<string | null>(null);
 
   const processCV = async (file: File) => {
+    // File size validation
     if (file.size > 10 * 1024 * 1024) {
       setError('File size should be less than 10MB');
+      return;
+    }
+
+    // File type validation
+    const validTypes = [
+      'application/pdf',
+      'text/plain',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    if (!validTypes.includes(file.type)) {
+      setError('Unsupported file type. Please upload a PDF or text file.');
       return;
     }
 
@@ -53,10 +67,9 @@ export const useCV = (): UseCV => {
           'Content-Type': 'application/json',
           'Origin': window.location.origin,
         },
-
         body: JSON.stringify({
           file_content: base64Data,
-          content_type: "text/plain"
+          content_type: file.type
         }),
       });
 
