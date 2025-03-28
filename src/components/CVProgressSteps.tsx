@@ -5,7 +5,7 @@ const steps = [
   { 
     id: '01', 
     name: 'Upload CV', 
-    description: 'Upload your CV in PDF, DOC, DOCX, or TXT format',
+    description: 'Upload your CV in PDF or DOCX format',
     href: '#', 
     status: 'complete',
     icon: DocumentTextIcon 
@@ -13,7 +13,7 @@ const steps = [
   { 
     id: '02', 
     name: 'AI Analysis', 
-    description: 'Our AI analyzes your CV against Amazon Leadership Principles and STAR format',
+    description: 'Our AI analyses your CV against Amazon Leadership Principles and STAR format',
     href: '#', 
     status: 'current',
     icon: DocumentMagnifyingGlassIcon 

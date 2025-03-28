@@ -77,7 +77,7 @@ export default function CVHelperPage() {
                           id="cv-upload"
                           type="file"
                           className="sr-only"
-                          accept=".pdf,.doc,.docx,.txt"
+                          accept=".pdf,.docx"
                           onChange={handleFileUpload}
                         />
                         {file ? (
@@ -89,7 +89,7 @@ export default function CVHelperPage() {
                           {file ? file.name : 'Upload your CV'}
                         </span>
                         <span className="mt-2 block text-sm text-gray-400">
-                          Accepts PDF, DOC, DOCX, or TXT files (Max size: 10MB)
+                          Accepts PDF or DOCX files (Max size: 10MB)
                         </span>
                       </label>
                     ) : (
