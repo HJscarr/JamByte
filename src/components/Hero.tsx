@@ -55,11 +55,17 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 const Hero: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const { data: hasBought = false } = useHasBought('Pi-Guard');
 
   const dotLottieRefCallback = (dotLottieInstance: DotLottie | null) => {
     setDotLottie(dotLottieInstance);
+    if (dotLottieInstance) {
+      dotLottieInstance.addEventListener('load', () => {
+        setIsLoading(false);
+      });
+    }
   };
 
   useEffect(() => {
@@ -132,38 +138,59 @@ const Hero: React.FC = () => {
     <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-start h-[calc(100vh-4rem)]">
       <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
+          {isLoading && (
+            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+              <div className="animate-pulse text-white">Loading...</div>
+            </div>
+          )}
           {isMobile ? (
             <DotLottieReact
               src={mobileAnimation}
               loop
               autoplay
-              className="w-full h-full scale-[0.90] mt-32"
               renderConfig={{
                 devicePixelRatio: window.devicePixelRatio || 1,
-                autoResize: true,
+                autoResize: true
+              }}
+              style={{
+                position: 'absolute',
+                top: '55%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '90%',
+                height: '90%',
+                maxWidth: '100vw',
+                maxHeight: '100vh',
+                opacity: isLoading ? 0 : 1,
+                transition: 'opacity 0.3s ease-in-out'
               }}
             />
           ) : (
             <div className="relative w-full h-full flex items-center justify-center">
-  <DotLottieReact
-    src={desktopAnimation}
-    loop
-    autoplay
-    dotLottieRefCallback={dotLottieRefCallback}
-    useFrameInterpolation={false}
-    className="absolute"
-    renderConfig={{
-      devicePixelRatio: window.devicePixelRatio || 1,
-      autoResize: true
-    }}
-    style={{ 
-      width: '120vw',
-      height: '120vh',
-      top: '-10%',
-      left: '0',
-    }}
-  />
-</div>
+              <DotLottieReact
+                src={desktopAnimation}
+                loop
+                autoplay
+                dotLottieRefCallback={dotLottieRefCallback}
+                useFrameInterpolation={true}
+                renderConfig={{
+                  devicePixelRatio: window.devicePixelRatio || 1,
+                  autoResize: true
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '33%',
+                  left: '51.8%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '100%',
+                  height: '100%',
+                  maxWidth: '100vw',
+                  maxHeight: '100vh',
+                  opacity: isLoading ? 0 : 1,
+                  transition: 'opacity 0.3s ease-in-out'
+                }}
+              />
+            </div>
           )}
         </div>
         <div className="relative z-[1] w-full -mt-2 md:mt-16 2xl:mt-32">
