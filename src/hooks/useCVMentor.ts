@@ -32,14 +32,23 @@ export const useCV = (): UseCV => {
       case 'application/pdf':
         try {
           const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           let fullText = '';
           
           // Extract text from each page
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item: any) => item.str).join(' ');
+            const textContent = await page.getTextContent({
+              normalizeWhitespace: true,
+              disableCombineTextItems: false
+            });
+            
+            const pageText = textContent.items
+              .map((item: any) => item.str)
+              .join(' ')
+              .replace(/\s+/g, ' ') // Collapse multiple spaces
+              .trim();
+            
             fullText += pageText + '\n';
           }
           
