@@ -1,11 +1,5 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Initialize PDF.js worker
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
-}
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -33,6 +27,13 @@ export const useCV = (): UseCV => {
     switch (file.type) {
       case 'application/pdf':
         try {
+          if (typeof window === 'undefined') {
+            throw new Error('PDF processing is only available in the browser');
+          }
+
+          const pdfjsLib = await import('pdfjs-dist');
+          pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+          
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           let fullText = '';
