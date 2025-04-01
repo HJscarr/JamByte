@@ -83,6 +83,9 @@ importers:
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
+      pdfjs-dist:
+        specifier: ^5.1.91
+        version: 5.1.91
       react:
         specifier: ^18
         version: 18.3.1
@@ -3337,8 +3340,8 @@ packages:
     resolution: {integrity: sha512-IHZsA4T7YElCKNNXtiLgqScw4zPd3pG9do8UrznC757gMd7UPeHSL2qwNNMJo4r79fl8oj1Xx+1nh2YkzdMpLQ==}
     engines: {node: '>=18'}
 
-  pdfjs-dist@5.0.375:
-    resolution: {integrity: sha512-QDRlEVldf/cX88CElGAyRhjqNOO69kmB3HZlalDAfqJ/IvmqJNkipomhBZy4cWATfLVlkQTXE3H4yFvMF2uPsg==}
+  pdfjs-dist@5.1.91:
+    resolution: {integrity: sha512-qSIADdagooJB4wWCBnrBJjRvASevmxL0BwafvOuKJG5uTQdYoFBrhrRYnucKNiSc9qS6JIk0hC5y1yktFljXkA==}
     engines: {node: '>=20'}
 
   pend@1.2.0:
@@ -5115,7 +5118,7 @@ snapshots:
 
   '@types/pdfjs-dist@2.10.378':
     dependencies:
-      pdfjs-dist: 5.0.375
+      pdfjs-dist: 5.1.91
 
   '@types/phoenix@1.6.6': {}
 
@@ -7768,7 +7771,7 @@ snapshots:
       canvas: 3.1.0
       path2d: 0.2.2
 
-  pdfjs-dist@5.0.375:
+  pdfjs-dist@5.1.91:
     optionalDependencies:
       '@napi-rs/canvas': 0.1.68
 

@@ -3,7 +3,9 @@ import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+}
 
 interface CVAnalysisResponse {
   analysis?: string;
