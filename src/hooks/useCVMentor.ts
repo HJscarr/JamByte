@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
 import * as pdfjs from 'pdfjs-dist';
+import pdf2html from 'pdf2html';
+
+// Add type declaration for pdf2html
+declare module 'pdf2html' {
+  function pdf2html(arrayBuffer: ArrayBuffer): Promise<string>;
+  export default pdf2html;
+}
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -34,63 +41,6 @@ export const useCV = (): UseCV => {
   const [formattedCV, setFormattedCV] = useState<string | null>(null);
 
   /**
-   * Convert PDF content to HTML
-   */
-  const convertPdfToHtml = (pageContent: PDFTextContent): string => {
-    let html = '<div class="pdf-page">';
-    
-    // Sort items by their vertical position (top to bottom)
-    const sortedItems = [...pageContent.items].sort((a, b) => {
-      const aY = a.transform ? a.transform[5] : 0;
-      const bY = b.transform ? b.transform[5] : 0;
-      return bY - aY; // PDF coordinates are bottom-up
-    });
-    
-    let currentY: number | null = null;
-    let currentLine: PDFTextItem[] = [];
-    
-    // Group items by lines based on Y position
-    sortedItems.forEach(item => {
-      const y = item.transform ? item.transform[5] : 0;
-      
-      // If this is a new line
-      if (currentY === null || Math.abs(y - currentY) > 2) {
-        // Process the previous line if it exists
-        if (currentLine.length > 0) {
-          // Sort items in the line by X position (left to right)
-          currentLine.sort((a, b) => {
-            const aX = a.transform ? a.transform[4] : 0;
-            const bX = b.transform ? b.transform[4] : 0;
-            return aX - bX;
-          });
-          
-          // Add the line to HTML
-          html += '<p>' + currentLine.map(i => i.str).join(' ') + '</p>';
-          currentLine = [];
-        }
-        
-        currentY = y;
-      }
-      
-      currentLine.push(item);
-    });
-    
-    // Process the last line
-    if (currentLine.length > 0) {
-      currentLine.sort((a, b) => {
-        const aX = a.transform ? a.transform[4] : 0;
-        const bX = b.transform ? b.transform[4] : 0;
-        return aX - bX;
-      });
-      
-      html += '<p>' + currentLine.map(i => i.str).join(' ') + '</p>';
-    }
-    
-    html += '</div>';
-    return html;
-  };
-
-  /**
    * Extract text from an uploaded file based on its type
    */
   const extractText = async (file: File): Promise<{ text: string; html: string }> => {
@@ -108,30 +58,17 @@ export const useCV = (): UseCV => {
             fileReader.readAsArrayBuffer(file);
           });
 
-          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-          const numPages = pdf.numPages;
-          let extractedText = '';
-          let extractedHtml = '';
-
-          for (let i = 1; i <= numPages; i++) {
-            const page = await pdf.getPage(i);
-            const pageText = await page.getTextContent();
-            const pageLines = pageText.items.map((item) => item.str).join('\n');
-            
-            // Convert page content to HTML
-            const pageHtml = convertPdfToHtml(pageText);
-            
-            if (extractedText !== '') {
-              extractedText += '\n\n';
-            }
-            extractedText += pageLines;
-
-            extractedHtml += pageHtml;
-          }
+          // Convert PDF to HTML
+          const html = await pdf2html(arrayBuffer);
+          
+          // Extract text from HTML
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          const text = tempDiv.textContent || '';
 
           return {
-            text: extractedText.trim(),
-            html: `<div class="pdf-document">${extractedHtml}</div>`
+            text: text.trim(),
+            html: html
           };
         } catch (error) {
           console.error('PDF extraction error:', error);
