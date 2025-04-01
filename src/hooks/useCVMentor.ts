@@ -15,6 +15,18 @@ interface UseCV {
   processCV: (file: File) => Promise<void>;
 }
 
+// Define types for PDF text content
+interface PDFTextItem {
+  str: string;
+  transform?: number[];
+  [key: string]: any;
+}
+
+interface PDFTextContent {
+  items: PDFTextItem[];
+  [key: string]: any;
+}
+
 export const useCV = (): UseCV => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,9 +34,66 @@ export const useCV = (): UseCV => {
   const [formattedCV, setFormattedCV] = useState<string | null>(null);
 
   /**
+   * Convert PDF content to HTML
+   */
+  const convertPdfToHtml = (pageContent: PDFTextContent): string => {
+    let html = '<div class="pdf-page">';
+    
+    // Sort items by their vertical position (top to bottom)
+    const sortedItems = [...pageContent.items].sort((a, b) => {
+      const aY = a.transform ? a.transform[5] : 0;
+      const bY = b.transform ? b.transform[5] : 0;
+      return bY - aY; // PDF coordinates are bottom-up
+    });
+    
+    let currentY: number | null = null;
+    let currentLine: PDFTextItem[] = [];
+    
+    // Group items by lines based on Y position
+    sortedItems.forEach(item => {
+      const y = item.transform ? item.transform[5] : 0;
+      
+      // If this is a new line
+      if (currentY === null || Math.abs(y - currentY) > 2) {
+        // Process the previous line if it exists
+        if (currentLine.length > 0) {
+          // Sort items in the line by X position (left to right)
+          currentLine.sort((a, b) => {
+            const aX = a.transform ? a.transform[4] : 0;
+            const bX = b.transform ? b.transform[4] : 0;
+            return aX - bX;
+          });
+          
+          // Add the line to HTML
+          html += '<p>' + currentLine.map(i => i.str).join(' ') + '</p>';
+          currentLine = [];
+        }
+        
+        currentY = y;
+      }
+      
+      currentLine.push(item);
+    });
+    
+    // Process the last line
+    if (currentLine.length > 0) {
+      currentLine.sort((a, b) => {
+        const aX = a.transform ? a.transform[4] : 0;
+        const bX = b.transform ? b.transform[4] : 0;
+        return aX - bX;
+      });
+      
+      html += '<p>' + currentLine.map(i => i.str).join(' ') + '</p>';
+    }
+    
+    html += '</div>';
+    return html;
+  };
+
+  /**
    * Extract text from an uploaded file based on its type
    */
-  const extractText = async (file: File): Promise<string> => {
+  const extractText = async (file: File): Promise<{ text: string; html: string }> => {
     switch (file.type) {
       case 'application/pdf':
         try {
@@ -42,19 +111,28 @@ export const useCV = (): UseCV => {
           const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
           const numPages = pdf.numPages;
           let extractedText = '';
+          let extractedHtml = '';
 
           for (let i = 1; i <= numPages; i++) {
             const page = await pdf.getPage(i);
             const pageText = await page.getTextContent();
             const pageLines = pageText.items.map((item) => item.str).join('\n');
             
+            // Convert page content to HTML
+            const pageHtml = convertPdfToHtml(pageText);
+            
             if (extractedText !== '') {
-              extractedText += '\n';
+              extractedText += '\n\n';
             }
             extractedText += pageLines;
+
+            extractedHtml += pageHtml;
           }
 
-          return extractedText.trim();
+          return {
+            text: extractedText.trim(),
+            html: `<div class="pdf-document">${extractedHtml}</div>`
+          };
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
@@ -64,8 +142,12 @@ export const useCV = (): UseCV => {
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         try {
           const arrayBuffer = await file.arrayBuffer();
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          return result.value;
+          const textResult = await mammoth.extractRawText({ arrayBuffer });
+          const htmlResult = await mammoth.convertToHtml({ arrayBuffer });
+          return {
+            text: textResult.value,
+            html: htmlResult.value
+          };
         } catch (error) {
           console.error('Word extraction error:', error);
           throw new Error('Failed to extract text from Word document. Please try a different file.');
@@ -107,8 +189,8 @@ export const useCV = (): UseCV => {
     }
 
     try {
-      // Extract text from the file
-      const text = await extractText(file);
+      // Extract text and HTML from the file
+      const { text, html } = await extractText(file);
       
       if (!text || text.trim().length === 0) {
         throw new Error('Could not extract any text from the file. It may be empty or corrupted.');
@@ -123,6 +205,7 @@ export const useCV = (): UseCV => {
         },
         body: JSON.stringify({
           text_content: text,
+          html_content: html,
           content_type: file.type
         }),
       });

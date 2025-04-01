@@ -86,6 +86,9 @@ importers:
       pdf-parse:
         specifier: ^1.1.1
         version: 1.1.1
+      pdf.js-extract:
+        specifier: ^0.2.1
+        version: 0.2.1
       pdfjs-dist:
         specifier: ^5.1.91
         version: 5.1.91
@@ -1747,6 +1750,9 @@ packages:
   dom-walk@0.1.2:
     resolution: {integrity: sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w==}
 
+  dommatrix@0.0.24:
+    resolution: {integrity: sha512-PatEhAW5pIHr28MvFQGV5iiHNloqvecQZlxs7/8s/eulLqZI3uVqPkrO7YDuqsebovr/9mmcWDSWzVG4amEZgQ==}
+
   dompurify@3.2.3:
     resolution: {integrity: sha512-U1U5Hzc2MO0oW3DF+G9qYN0aT7atAou4AgI0XjWz061nyBPbdxkfdhfy5uMgGn6+oLFCfn44ZGbdDqCzVmlOWA==}
 
@@ -3276,6 +3282,10 @@ packages:
     resolution: {integrity: sha512-v6ZJ/efsBpGrGGknjtq9J/oC8tZWq0KWL5vQrk2GlzLEQPUDB1ex+13Rmidl1neNN358Jn9EHZw5y07FFtaC7A==}
     engines: {node: '>=6.8.1'}
 
+  pdf.js-extract@0.2.1:
+    resolution: {integrity: sha512-oUs5KaTVCelIyiBajCx3zAZKurkN9oVwRdqbSeDqeofddxNuwJRur86fCETvKZ/tX5nZJUSZWq3ie76PsArz7A==}
+    engines: {node: '>=12.0.0'}
+
   pdfjs-dist@5.1.91:
     resolution: {integrity: sha512-qSIADdagooJB4wWCBnrBJjRvASevmxL0BwafvOuKJG5uTQdYoFBrhrRYnucKNiSc9qS6JIk0hC5y1yktFljXkA==}
     engines: {node: '>=20'}
@@ -4083,6 +4093,10 @@ packages:
 
   videojs-vtt.js@0.15.5:
     resolution: {integrity: sha512-yZbBxvA7QMYn15Lr/ZfhhLPrNpI/RmCSCqgIff57GC2gIrV5YfyzLfLyZMj0NnZSAz8syB4N0nHXpZg9MyrMOQ==}
+
+  web-streams-polyfill@3.2.0:
+    resolution: {integrity: sha512-EqPmREeOzttaLRm5HS7io98goBgZ7IVz79aDvqjD0kYXLtFZTc0T/U6wHTPKyIjb+MdN7DFIIX6hgdBEpWmfPA==}
+    engines: {node: '>= 8'}
 
   web-vitals@0.2.4:
     resolution: {integrity: sha512-6BjspCO9VriYy12z356nL6JBS0GYeEcA457YyRzD+dD6XYCQ75NKhcOHUMHentOE7OcVCIXXDvOm0jKFfQG2Gg==}
@@ -5778,6 +5792,8 @@ snapshots:
       esutils: 2.0.3
 
   dom-walk@0.1.2: {}
+
+  dommatrix@0.0.24: {}
 
   dompurify@3.2.3:
     optionalDependencies:
@@ -7591,6 +7607,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  pdf.js-extract@0.2.1:
+    dependencies:
+      dommatrix: 0.0.24
+      web-streams-polyfill: 3.2.0
+
   pdfjs-dist@5.1.91:
     optionalDependencies:
       '@napi-rs/canvas': 0.1.68
@@ -8575,6 +8596,8 @@ snapshots:
   videojs-vtt.js@0.15.5:
     dependencies:
       global: 4.4.0
+
+  web-streams-polyfill@3.2.0: {}
 
   web-vitals@0.2.4: {}
 
