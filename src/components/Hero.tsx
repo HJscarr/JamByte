@@ -55,17 +55,11 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 const Hero: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const { data: hasBought = false } = useHasBought('Pi-Guard');
 
   const dotLottieRefCallback = (dotLottieInstance: DotLottie | null) => {
     setDotLottie(dotLottieInstance);
-    if (dotLottieInstance) {
-      dotLottieInstance.addEventListener('load', () => {
-        setIsLoading(false);
-      });
-    }
   };
 
   useEffect(() => {
@@ -138,11 +132,6 @@ const Hero: React.FC = () => {
     <div className="bg-gray-900 text-white w-full flex flex-col items-center justify-start h-[calc(100vh-4rem)]">
       <div className="w-full lg:w-5/6 relative flex items-start justify-center h-full overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
-          {isLoading && (
-            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-              <div className="animate-pulse text-white">Loading...</div>
-            </div>
-          )}
           {isMobile ? (
             <DotLottieReact
               src={mobileAnimation}
@@ -160,9 +149,7 @@ const Hero: React.FC = () => {
                 width: '90%',
                 height: '90%',
                 maxWidth: '100vw',
-                maxHeight: '100vh',
-                opacity: isLoading ? 0 : 1,
-                transition: 'opacity 0.3s ease-in-out'
+                maxHeight: '100vh'
               }}
             />
           ) : (
@@ -185,9 +172,7 @@ const Hero: React.FC = () => {
                   width: '100%',
                   height: '100%',
                   maxWidth: '100vw',
-                  maxHeight: '100vh',
-                  opacity: isLoading ? 0 : 1,
-                  transition: 'opacity 0.3s ease-in-out'
+                  maxHeight: '100vh'
                 }}
               />
             </div>
