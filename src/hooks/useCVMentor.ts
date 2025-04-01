@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import * as pdfjs from 'pdfjs-dist';
+import pdfParse from 'pdf-parse';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -28,26 +28,10 @@ export const useCV = (): UseCV => {
     switch (file.type) {
       case 'application/pdf':
         try {
-          // Simple PDF text extraction without worker configuration
+          // PDF text extraction using pdf-parse
           const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-          let fullText = '';
-          
-          // Process each page
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            
-            // Extract and join text strings with space
-            const pageText = textContent.items
-              .filter(item => 'str' in item)
-              .map(item => (item as any).str)
-              .join(' ');
-            
-            fullText += pageText + '\n\n';
-          }
-          
-          return fullText.trim();
+          const data = await pdfParse(arrayBuffer);
+          return data.text;
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
