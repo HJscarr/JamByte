@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdfToText from 'react-pdftotext';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -32,22 +32,8 @@ export const useCV = (): UseCV => {
             throw new Error('PDF processing is only available in the browser');
           }
           
-          const arrayBuffer = await file.arrayBuffer();
-          
-          const pdfDocument = await pdfjsLib.getDocument({
-            data: arrayBuffer
-          }).promise;
-
-          let extractedText = '';
-          
-          for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
-            const page = await pdfDocument.getPage(pageNum);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item) => item.str).join(' ');
-            extractedText += pageText + '\n';
-          }
-          
-          return extractedText.trim();
+          const text = await pdfToText(file);
+          return text.trim();
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
