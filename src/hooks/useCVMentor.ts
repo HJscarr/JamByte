@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import pdfToText from 'react-pdftotext';
+import pdfParse from 'pdf-parse';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -32,8 +32,10 @@ export const useCV = (): UseCV => {
             throw new Error('PDF processing is only available in the browser');
           }
           
-          const text = await pdfToText(file);
-          return text.trim();
+          const arrayBuffer = await file.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const data = await pdfParse(buffer);
+          return data.text.trim();
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
