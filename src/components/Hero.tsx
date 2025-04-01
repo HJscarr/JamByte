@@ -179,7 +179,7 @@ const Hero: React.FC = () => {
                 }}
                 style={{
                   position: 'absolute',
-                  top: '33%',
+                  top: '36%',
                   left: '51.8%',
                   transform: 'translate(-50%, -50%)',
                   width: '100%',
