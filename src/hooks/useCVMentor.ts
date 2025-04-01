@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
-import PDFWorker from '../workers/pdf.worker';
+
+// Import the worker
+import '../workers/pdf.worker';
 
 // Set up the worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = PDFWorker;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface CVAnalysisResponse {
   analysis?: string;

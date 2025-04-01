@@ -1,2 +1,1 @@
-import { PDFWorker } from 'pdfjs-dist/legacy/build/pdf.worker.entry';
-export default PDFWorker; 
+import 'pdfjs-dist/build/pdf.worker.min.js'; 

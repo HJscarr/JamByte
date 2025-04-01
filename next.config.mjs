@@ -39,6 +39,15 @@ const nextConfig = {
       },
     });
 
+    // Add support for PDF.js worker
+    config.module.rules.push({
+      test: /pdf\.worker\.(min\.)?js/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/worker/[hash][ext]',
+      },
+    });
+
     return config;
   },
   swcMinify: true,
