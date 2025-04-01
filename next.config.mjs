@@ -21,6 +21,8 @@ const nextConfig = {
         tls: false,
         fs: false,
         dns: false,
+        canvas: false,
+        encoding: false,
       };
     }
 
