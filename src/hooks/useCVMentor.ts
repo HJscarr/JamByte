@@ -1,13 +1,5 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import * as pdfjs from 'pdfjs-dist';
-import pdf2html from 'pdf2html';
-
-// Add type declaration for pdf2html
-declare module 'pdf2html' {
-  function pdf2html(arrayBuffer: ArrayBuffer): Promise<string>;
-  export default pdf2html;
-}
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -22,18 +14,6 @@ interface UseCV {
   processCV: (file: File) => Promise<void>;
 }
 
-// Define types for PDF text content
-interface PDFTextItem {
-  str: string;
-  transform?: number[];
-  [key: string]: any;
-}
-
-interface PDFTextContent {
-  items: PDFTextItem[];
-  [key: string]: any;
-}
-
 export const useCV = (): UseCV => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,36 +23,26 @@ export const useCV = (): UseCV => {
   /**
    * Extract text from an uploaded file based on its type
    */
-  const extractText = async (file: File): Promise<{ text: string; html: string }> => {
+  const extractText = async (file: File): Promise<string> => {
     switch (file.type) {
       case 'application/pdf':
         try {
-          if (typeof window === 'undefined') {
-            throw new Error('PDF processing is only available in the browser');
-          }
-          
-          const fileReader = new FileReader();
-          const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
-            fileReader.onload = () => resolve(fileReader.result as ArrayBuffer);
-            fileReader.onerror = reject;
-            fileReader.readAsArrayBuffer(file);
+          // Convert PDF to base64
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64 = reader.result?.toString().split(',')[1];
+              if (base64) resolve(base64);
+              else reject(new Error('Failed to convert file to base64'));
+            };
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
           });
 
-          // Convert PDF to HTML
-          const html = await pdf2html(arrayBuffer);
-          
-          // Extract text from HTML
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = html;
-          const text = tempDiv.textContent || '';
-
-          return {
-            text: text.trim(),
-            html: html
-          };
+          return base64Data;
         } catch (error) {
-          console.error('PDF extraction error:', error);
-          throw new Error('Failed to extract text from PDF. Please try a different file.');
+          console.error('PDF conversion error:', error);
+          throw new Error('Failed to convert PDF to base64. Please try a different file.');
         }
       
       case 'application/msword':
@@ -80,11 +50,7 @@ export const useCV = (): UseCV => {
         try {
           const arrayBuffer = await file.arrayBuffer();
           const textResult = await mammoth.extractRawText({ arrayBuffer });
-          const htmlResult = await mammoth.convertToHtml({ arrayBuffer });
-          return {
-            text: textResult.value,
-            html: htmlResult.value
-          };
+          return textResult.value;
         } catch (error) {
           console.error('Word extraction error:', error);
           throw new Error('Failed to extract text from Word document. Please try a different file.');
@@ -126,14 +92,10 @@ export const useCV = (): UseCV => {
     }
 
     try {
-      // Extract text and HTML from the file
-      const { text, html } = await extractText(file);
+      // Extract text from the file
+      const content = await extractText(file);
       
-      if (!text || text.trim().length === 0) {
-        throw new Error('Could not extract any text from the file. It may be empty or corrupted.');
-      }
-      
-      // Send text to backend
+      // Send to backend
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
         headers: {
@@ -141,8 +103,7 @@ export const useCV = (): UseCV => {
           'Origin': window.location.origin,
         },
         body: JSON.stringify({
-          text_content: text,
-          html_content: html,
+          text_content: content,
           content_type: file.type
         }),
       });
