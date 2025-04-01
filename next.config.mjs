@@ -21,8 +21,6 @@ const nextConfig = {
         tls: false,
         fs: false,
         dns: false,
-        canvas: false,
-        encoding: false,
       };
     }
 
@@ -36,15 +34,6 @@ const nextConfig = {
       type: 'asset/resource',
       generator: {
         filename: 'static/media/[hash][ext]',
-      },
-    });
-
-    // Add support for PDF.js worker
-    config.module.rules.push({
-      test: /pdf\.worker\.(min\.)?js/,
-      type: 'asset/resource',
-      generator: {
-        filename: 'static/worker/[hash][ext]',
       },
     });
 

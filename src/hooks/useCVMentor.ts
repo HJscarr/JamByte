@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Import the worker
-import '../workers/pdf.worker';
-
-// Set up the worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -39,27 +33,21 @@ export const useCV = (): UseCV => {
           }
           
           const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = '';
           
-          // Extract text from each page
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent({
-              normalizeWhitespace: true,
-              disableCombineTextItems: false
-            });
-            
-            const pageText = textContent.items
-              .map((item: any) => item.str)
-              .join(' ')
-              .replace(/\s+/g, ' ') // Collapse multiple spaces
-              .trim();
-            
-            fullText += pageText + '\n';
+          const pdfDocument = await pdfjsLib.getDocument({
+            data: arrayBuffer
+          }).promise;
+
+          let extractedText = '';
+          
+          for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+            const page = await pdfDocument.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map((item) => item.str).join(' ');
+            extractedText += pageText + '\n';
           }
           
-          return fullText.trim();
+          return extractedText.trim();
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
