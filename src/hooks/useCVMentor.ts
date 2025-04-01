@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import pdfParse from 'pdf-parse';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Initialize PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -28,10 +31,19 @@ export const useCV = (): UseCV => {
     switch (file.type) {
       case 'application/pdf':
         try {
-          // PDF text extraction using pdf-parse
           const arrayBuffer = await file.arrayBuffer();
-          const data = await pdfParse(arrayBuffer);
-          return data.text;
+          const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+          let fullText = '';
+          
+          // Extract text from each page
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map((item: any) => item.str).join(' ');
+            fullText += pageText + '\n';
+          }
+          
+          return fullText.trim();
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
@@ -40,7 +52,6 @@ export const useCV = (): UseCV => {
       case 'application/msword':
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         try {
-          // Word document extraction using mammoth
           const arrayBuffer = await file.arrayBuffer();
           const result = await mammoth.extractRawText({ arrayBuffer });
           return result.value;
