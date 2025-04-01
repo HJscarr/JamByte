@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
-import pdfParse from 'pdf-parse';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -32,6 +31,8 @@ export const useCV = (): UseCV => {
             throw new Error('PDF processing is only available in the browser');
           }
           
+          // Dynamically import pdf-parse only on the client side
+          const pdfParse = (await import('pdf-parse')).default;
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
           const data = await pdfParse(buffer);
