@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
+import * as pdfjs from 'pdfjs-dist';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -31,12 +32,29 @@ export const useCV = (): UseCV => {
             throw new Error('PDF processing is only available in the browser');
           }
           
-          // Dynamically import pdf-parse only on the client side
-          const pdfParse = (await import('pdf-parse')).default;
-          const arrayBuffer = await file.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          const data = await pdfParse(buffer);
-          return data.text.trim();
+          const fileReader = new FileReader();
+          const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result as ArrayBuffer);
+            fileReader.onerror = reject;
+            fileReader.readAsArrayBuffer(file);
+          });
+
+          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+          const numPages = pdf.numPages;
+          let extractedText = '';
+
+          for (let i = 1; i <= numPages; i++) {
+            const page = await pdf.getPage(i);
+            const pageText = await page.getTextContent();
+            const pageLines = pageText.items.map((item) => item.str).join('\n');
+            
+            if (extractedText !== '') {
+              extractedText += '\n';
+            }
+            extractedText += pageLines;
+          }
+
+          return extractedText.trim();
         } catch (error) {
           console.error('PDF extraction error:', error);
           throw new Error('Failed to extract text from PDF. Please try a different file.');
