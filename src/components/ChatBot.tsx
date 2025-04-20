@@ -15,10 +15,10 @@ const ChatBot: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const chatbotRef = useRef<HTMLDivElement | null>(null);
 
-  // Load chat history from localStorage when the component mounts
+  // Load chat history from sessionStorage when the component mounts
   useEffect(() => {
-    console.log("Loading chat history from localStorage");
-    const savedMessages = localStorage.getItem('chatHistory');
+    console.log("Loading chat history from sessionStorage");
+    const savedMessages = sessionStorage.getItem('chatHistory');
     if (savedMessages) {
       console.log("Saved messages found:", JSON.parse(savedMessages));
       setMessages(JSON.parse(savedMessages));
@@ -28,10 +28,10 @@ const ChatBot: React.FC = () => {
     }
   }, []);
 
-  // Save chat history to localStorage whenever messages change
+  // Save chat history to sessionStorage whenever messages change
   useEffect(() => {
-    console.log("Saving chat history to localStorage:", messages);
-    localStorage.setItem('chatHistory', JSON.stringify(messages));
+    console.log("Saving chat history to sessionStorage:", messages);
+    sessionStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import mammoth from 'mammoth';
+import { useAuth } from '@/context/AuthContext';
+import { CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 
 interface CVAnalysisResponse {
   analysis?: string;
@@ -19,6 +21,7 @@ export const useCV = (): UseCV => {
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [formattedCV, setFormattedCV] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
   /**
    * Extract text from an uploaded file based on its type
@@ -96,10 +99,30 @@ export const useCV = (): UseCV => {
       const content = await extractText(file);
       
       // Send to backend
+      const userPool = new CognitoUserPool({
+        UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
+        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!
+      });
+
+      const cognitoUser = userPool.getCurrentUser();
+      if (!cognitoUser) {
+        throw new Error('User not authenticated');
+      }
+
+      const session = await new Promise<CognitoUserSession>((resolve, reject) => {
+        cognitoUser.getSession((err: Error | null, session: CognitoUserSession) => {
+          if (err) reject(err);
+          else resolve(session);
+        });
+      });
+
+      const token = session.getIdToken().getJwtToken();
+      
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/cv-mentor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
           'Origin': window.location.origin,
         },
         body: JSON.stringify({
