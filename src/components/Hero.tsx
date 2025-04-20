@@ -19,8 +19,8 @@ interface TypingAnimationProps {
 const TypingAnimation: React.FC<TypingAnimationProps> = ({
   messages,
   articles,
-  typingSpeed = 75,
-  deletingSpeed = 25,
+  typingSpeed = 150,
+  deletingSpeed = 75,
 }) => {
   const [index, setIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
