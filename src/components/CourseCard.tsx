@@ -107,30 +107,16 @@ const CourseCard: React.FC<CourseProps> = ({
 
         <div className="relative w-full mt-auto space-y-4 px-12 sm:px-16">
           {showActions ? (
-            <>
-              {hasBought ? (
-                <Link href={`/courses/${title.toLowerCase().replace(/\s+/g, '-')}/lesson`} className="block w-full">
-                  <button 
-                    onClick={(e) => e.stopPropagation()} 
-                    className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-4 sm:px-6 py-3 text-sm sm:text-base font-medium text-white transition-all duration-300 whitespace-nowrap"
-                  >
-                    Start Learning
-                    <RocketLaunchIcon className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                  </button>
-                </Link>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBuyClick();
-                  }}
-                  className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 py-3 text-base font-medium text-white transition-all duration-300"
-                >
-                  Buy now
-                  <ShoppingCartIcon className="ml-2 h-5 w-5" />
-                </button>
-              )}
-            </>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(getCourseRoute(title));
+              }} 
+              className="w-full flex items-center justify-center rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-6 py-3 text-base font-medium text-white transition-all duration-300"
+            >
+              Learn more
+              <RocketLaunchIcon className="ml-2 h-5 w-5" />
+            </button>
           ) : (
             <button
               onClick={(e) => e.stopPropagation()}
@@ -140,16 +126,6 @@ const CourseCard: React.FC<CourseProps> = ({
               <BellIcon className="ml-2 h-5 w-5" />
             </button>
           )}
-
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(getCourseRoute(title));
-            }} 
-            className="w-full rounded-md border border-transparent px-6 py-3 text-base font-medium text-white hover:text-secondary transition-colors duration-300"
-          >
-            Learn more
-          </button>
 
           <div className="text-center text-white pb-2">
             {showActions && status === 'Available' && stockID && (
