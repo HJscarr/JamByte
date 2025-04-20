@@ -19,8 +19,8 @@ interface TypingAnimationProps {
 const TypingAnimation: React.FC<TypingAnimationProps> = ({
   messages,
   articles,
-  typingSpeed = 150,
-  deletingSpeed = 75,
+  typingSpeed = 75,
+  deletingSpeed = 25,
 }) => {
   const [index, setIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
@@ -101,7 +101,7 @@ const Hero: React.FC = () => {
         </h1>
 
         <p className="text-xl md:text-xl 2xl:text-2xl mb-6 max-w-sm mx-auto leading-tight">
-          <span className="text-white">Technology education through building exciting electronic devices.</span>        
+          <span className="text-white">Technology projects to make your CV stand out.</span>        
         </p>
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center mb-8 md:mb-0">
           {hasBought ? (

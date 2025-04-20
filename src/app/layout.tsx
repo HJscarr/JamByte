@@ -6,7 +6,7 @@ import AuthWrapper from '@/components/AuthWrapper';
 
 export const metadata: Metadata = {
   title: "JamByte",
-  description: "Technology education through building exciting electronic devices",
+  description: "Technology projects to make your CV stand out.",
 };
 
 export default function RootLayout({
