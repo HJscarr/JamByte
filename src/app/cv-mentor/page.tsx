@@ -113,7 +113,7 @@ export default function CVHelperPage() {
               {analysis && (
                 <div className="mt-8 max-w-4xl mx-auto">
                   <div className="bg-white bg-opacity-10 rounded-lg p-6 text-left">
-                    <h3 className="text-xl font-semibold text-white mb-4">CV Analysis Results</h3>
+                    <h3 className="text-4xl font-semibold text-white mb-4">CV Analysis Results</h3>
                     <div className="markdown-content">
                       <ReactMarkdown>{analysis}</ReactMarkdown>
                     </div>
