@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# JamByte
 
-## Getting Started
+A modern web application built with Next.js, featuring a robust frontend and AWS backend integration.
 
-First, run the development server:
+## 🚀 Tech Stack
 
+- **Frontend Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Package Manager**: [pnpm](https://pnpm.io/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Data Fetching**: [TanStack Query](https://tanstack.com/query/latest)
+- **Authentication**: AWS Cognito
+- **Deployment**: Cloudflare Pages
+- **UI Components**: [Headless UI](https://headlessui.com/), [Heroicons](https://heroicons.com/)
+- **Animation**: [GSAP](https://greensock.com/gsap/), [Lottie](https://lottiefiles.com/)
+- **PDF Processing**: [PDF-Lib](https://pdf-lib.js.org/)
+- **Markdown Processing**: [React Markdown](https://github.com/remarkjs/react-markdown)
+
+## 📋 Prerequisites
+
+- Node.js (LTS version)
+- pnpm
+- AWS Account (for backend services)
+- Cloudflare Account (for deployment)
+
+## 🛠️ Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+git clone [your-repo-url]
+cd jambyte
+```
+
+2. Install dependencies:
+```bash
+pnpm install
+```
+
+3. Set up environment variables:
+Create a `.env.local` file in the root directory with the following variables:
+```env
+# Add your environment variables here
+```
+
+## 🚀 Development
+
+Run the development server:
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```
+src/
+├── app/          # Next.js app router pages
+├── components/   # Reusable UI components
+├── context/      # React context providers
+├── hooks/        # Custom React hooks
+├── types/        # TypeScript type definitions
+├── data/         # Data fetching and API utilities
+└── images/       # Static images and assets
+```
 
-## Learn More
+## 🧪 Testing
 
-To learn more about Next.js, take a look at the following resources:
+Run the linter:
+```bash
+pnpm lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+The application is configured for deployment on Cloudflare Pages:
 
-## Deploy on Vercel
+1. Build the project:
+```bash
+pnpm pages:build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Preview locally:
+```bash
+pnpm preview
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+3. Deploy to production:
+```bash
+pnpm deploy
+```
+
+## 📚 Documentation
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- Your Name - [@yourusername](https://github.com/yourusername)
+
+## 🙏 Acknowledgments
+
+- Next.js team for the amazing framework
+- All contributors and maintainers of the open-source packages used in this project
