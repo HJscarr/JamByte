@@ -1,11 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import GradientButton from '@/components/GradientButton';
+import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline';
+
 const manCodingUrl = "/img/ManCoding.webp";
 const girlBuildingUrl = "/img/GirlBuilding.webp";
 
+
 export default function Contact() {
-  const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -13,12 +16,12 @@ export default function Contact() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false); // Track form submission
+  const [messageSent, setMessageSent] = useState(false); // Track if message was sent (on submit)
 
   const contactSignup = async (firstname:string, lastname:string, email: string, message: string): Promise<number> => {
     let statusCode = 0;
-    await fetch('https://b65l1amssg.execute-api.eu-west-1.amazonaws.com/Prod/', {
-      mode: 'cors',
-      method: 'PUT',
+    await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/contact', {
+      method: 'POST',
       body: JSON.stringify({
         firstname: firstname,
         lastname: lastname,
@@ -55,37 +58,22 @@ export default function Contact() {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitted(true);
+    setMessageSent(true);
     
     if (!isFormValid()) {
-      setResponseMessage('Please filled in all the fields before submitting.');
       return;
     }
     
     const { firstName, lastName, email, message } = formData;
 
     const statusCode = await contactSignup(firstName, lastName, email, message);
-    const firstDigit = Math.floor(statusCode / 100);
-    switch (firstDigit) {
-      case 2:
-        setResponseMessage('Thanks for reaching out! We will be with you shortly!');
-        break;
-      case 4:
-        setResponseMessage('Invalid request. Please try again.');
-        break;
-      case 5:
-        setResponseMessage('Server error. Please try again later.');
-        break;
-      default:
-        setResponseMessage('An unexpected error occurred. Please try again.');
-        break;
-    }
   };
 
   return (     
     <div className="isolate bg-grey-900 px-6 py-24 sm:py-32 lg:px-8" style={{
       backgroundImage: `url(${manCodingUrl}), url(${girlBuildingUrl})`,
-      backgroundSize: '15%, 15%',
-      backgroundPosition: '20% 10%, 80% 10%',
+      backgroundSize: '20%, 20%',
+      backgroundPosition: '10% 5%, 90% 5%',
       backgroundRepeat: 'no-repeat, no-repeat',
     }}>
       <div className="mx-auto max-w-2xl text-center" >
@@ -167,17 +155,23 @@ export default function Contact() {
           </div>
         
         </div>
-        <div className="mt-10">
-          <button
-            type="submit"
-            className="block w-full rounded-md bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 px-3.5 py-2.5 text-center text-sm font-semibold text-gray-200 shadow-sm hover:bg-pink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
-          >
-            Let's talk
-          </button>
+        <div className="mt-10 flex justify-center">
+          {messageSent ? (
+            <GradientButton className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 w-full flex justify-center">
+              <span className="flex items-center gap-2 mx-auto text-center whitespace-nowrap">
+                Message Received
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              </span>
+            </GradientButton>
+          ) : (
+            <GradientButton type="submit" className="bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 w-full flex justify-center">
+              <span className="flex items-center gap-2 mx-auto text-center whitespace-nowrap">
+                <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />
+                Let's talk
+              </span>
+            </GradientButton>
+          )}
         </div>
-        
-        {/* Display response message if available */}
-        {responseMessage && <p className="mt-4 text-white">{responseMessage}</p>}
       </form>
     </div>
   )
