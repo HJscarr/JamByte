@@ -23,5 +23,12 @@ export const courses = [
         status: "Coming soon",
         imageUrl: "/img/Link/Link.webp",
         details: `Create device that can communicate with no WiFi or Mobile data!`,
+    },
+    {
+        title: "Lens",
+        description: `Create a device that can capture images of wildlife automatically!`,
+        status: "Coming soon",
+        imageUrl: "/img/Lens/Lens.webp",
+        details: `Create a device that can capture images of wildlife automatically!`,
     }
 ];
