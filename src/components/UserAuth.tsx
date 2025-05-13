@@ -9,11 +9,13 @@ interface AuthComponentProps {
   setShowLoginModal: (show: boolean) => void;
   showSignUpModal: boolean;
   setShowSignUpModal: (show: boolean) => void;
+  title?: string;
 }
 
 const UserAuth: React.FC<AuthComponentProps> = ({
   showLoginModal, setShowLoginModal,
-  showSignUpModal, setShowSignUpModal
+  showSignUpModal, setShowSignUpModal,
+  title = 'Sign In'
 }) => {
   const auth = useAuth();
   const [email, setEmail] = useState('');
@@ -87,7 +89,7 @@ const UserAuth: React.FC<AuthComponentProps> = ({
       {/* Sign In Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-          <div className="relative bg-white rounded-lg shadow-xl p-8 m-4 max-w-xl w-full">
+          <div className="relative bg-white rounded-lg shadow-xl p-8 m-4 max-w-xl w-full md:max-w-md">
             <button
               onClick={() => setShowLoginModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
@@ -108,7 +110,9 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 />
               </div>
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-center">Sign In</h2>
+            <div className="mx-auto max-w-xs">
+              <h2 className="text-2xl font-bold mb-4 text-center break-words">{title}</h2>
+            </div>
             <form onSubmit={handleSignIn}>
               <input
                 type="email"

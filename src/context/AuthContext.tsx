@@ -30,6 +30,7 @@ type ModalState = {
   showVerificationModal: boolean;
   showForgotPasswordModal: boolean;
   showResetPasswordModal: boolean;
+  loginModalTitle?: string;
 };
 
 const defaultModalState: ModalState = {
@@ -38,6 +39,7 @@ const defaultModalState: ModalState = {
   showVerificationModal: false,
   showForgotPasswordModal: false,
   showResetPasswordModal: false,
+  loginModalTitle: undefined,
 };
 
 const userPool = new CognitoUserPool({

@@ -9,6 +9,7 @@ import { useCV } from '@/hooks/useCVMentor';
 import { useAuth } from '@/context/AuthContext';
 import dynamic from 'next/dynamic';
 import cvMentorLoading from '@/images/lottie/cv-mentor-loading.json';
+import AuthWrapper from '@/components/AuthWrapper';
 
 // Dynamically import Lottie with SSR disabled
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
@@ -27,7 +28,7 @@ export default function CVHelperPage() {
   };
 
   const handleLoginClick = () => {
-    setModalState(prev => ({ ...prev, showLoginModal: true }));
+    setModalState(prev => ({ ...prev, showLoginModal: true, loginModalTitle: 'Sign In/Up to Analyse Your CV for Free' }));
   };
 
   const showResults = analysis || formattedCV;
@@ -67,44 +68,35 @@ export default function CVHelperPage() {
                     </div>
                   </div>
                 ) : (
-                  <>
-                    {user ? (
-                      <label 
-                        htmlFor="cv-upload" 
-                        className="relative block w-full max-w-xl mx-auto rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 p-8 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 -mt-16 md:mt-8 lg:mt-16 sm:-mt-64 mb-12"
-                      >
-                        <input
-                          id="cv-upload"
-                          type="file"
-                          className="sr-only"
-                          accept=".pdf,.docx"
-                          onChange={handleFileUpload}
-                        />
-                        {file ? (
-                          <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        ) : (
-                          <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        )}
-                        <span className="mt-2 block text-sm font-semibold text-gray-200">
-                          {file ? file.name : 'Upload your CV'}
-                        </span>
-                        <span className="mt-2 block text-sm text-gray-400">
-                          Accepts PDF or DOCX files (Max size: 10MB)
-                        </span>
-                      </label>
+                  <label 
+                    htmlFor="cv-upload" 
+                    className="relative block w-full max-w-xl mx-auto rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 p-8 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 -mt-16 md:mt-8 lg:mt-16 sm:-mt-64 mb-12"
+                    onClick={(e) => {
+                      if (!user) {
+                        e.preventDefault();
+                        handleLoginClick();
+                      }
+                    }}
+                  >
+                    <input
+                      id="cv-upload"
+                      type="file"
+                      className="sr-only"
+                      accept=".pdf,.docx"
+                      onChange={handleFileUpload}
+                    />
+                    {file ? (
+                      <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
                     ) : (
-                      <div className="flex flex-col items-center justify-center p-8 space-y-3 -mt-16 md:mt-8 lg:mt-16 sm:-mt-64 mb-12">
-                        <p className="text-gray-300 text-lg">Sign In/Up below to analyse your CV! 📝</p>
-                        <button
-                          onClick={handleLoginClick}
-                          className="relative text-gray-200 bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500 rounded flex items-center justify-center gap-2 md:px-14 md:py-3 px-4 py-2 text-xs md:text-sm font-medium whitespace-nowrap hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-[120px] md:w-[140px]"
-                        >
-                          <span>Sign In/Up</span>
-                          <UserCircleIcon className="h-3 w-3 md:h-5 md:w-5 flex-shrink-0 text-white" />
-                        </button>
-                      </div>
+                      <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
                     )}
-                  </>
+                    <span className="mt-2 block text-sm font-semibold text-gray-200">
+                      {file ? file.name : 'Upload your CV'}
+                    </span>
+                    <span className="mt-2 block text-sm text-gray-400">
+                      Accepts PDF or DOCX files (Max size: 10MB)
+                    </span>
+                  </label>
                 )}
               </div>
             </>
@@ -162,6 +154,7 @@ export default function CVHelperPage() {
           </svg>
         </div>
       </div>
+      <AuthWrapper title="Sign In/Up to Analyse Your CV for Free" />
     </div>
   );
 }
