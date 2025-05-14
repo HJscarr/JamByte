@@ -34,15 +34,14 @@ const Charity: React.FC = () => {
           
           {/* Progress Bar Section */}
           <div className="mt-8 max-w-2xl mx-auto">
-            <div className="relative h-8 bg-gray-700 rounded-full overflow-hidden">
+            <div className="relative h-8 bg-gray-700 rounded-full overflow-hidden group">
               <div 
                 className="absolute h-full bg-gradient-to-r from-secondary to-red-400 transition-all duration-1000 ease-out"
                 style={{ width: `${progress}%` }}
-              >
-                <div className="absolute inset-0 animate-ripple bg-gradient-to-r from-secondary/30 to-red-400/30" />
-              </div>
+              />
+              <div className="absolute inset-0 transform translate-x-full group-hover:-translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none animate-shine" />
             </div>
-            <p className="mt-4 text-xl text-gray-200">
+            <p className="mt-4 text-md sm:text-lg text-gray-200">
               {loading ? (
                 'Loading...'
               ) : error ? (
@@ -53,7 +52,7 @@ const Charity: React.FC = () => {
             </p>
           </div>
 
-          <p className="flex justify-center items-center text-4xl mt-4 leading-8 text-gray-200">
+          <p className="flex justify-center items-center text-5xl mt-6 leading-8 text-gray-200">
             🎁
           </p>
         </div>
