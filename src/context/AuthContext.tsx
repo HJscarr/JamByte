@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
 import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js';
+import { identifyUser } from '@/lib/posthog';
 
 interface CognitoUserProfile {
   sub: string;
@@ -150,6 +151,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             setUser({ profile });
             setIsAuthenticated(true);
+            
+            // Identify user in PostHog
+            identifyUser(profile.sub, {
+              email: profile.email,
+              firstName: profile.given_name,
+              lastName: profile.family_name
+            });
+            
             resolve();
           });
         },

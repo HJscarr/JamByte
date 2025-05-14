@@ -3,6 +3,7 @@
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import getStripe from '@/hooks/useStripe';
+import { captureEvent } from '@/lib/posthog';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline'
 
 interface CheckoutHandlerProps {
@@ -21,6 +22,15 @@ const CheckoutHandler: React.FC<CheckoutHandlerProps> = ({ priceID, successUrl, 
             console.error('Stripe failed to load');
             return;
         }
+
+        // Track checkout initiation
+        captureEvent('checkout_initiated', {
+            priceId: priceID,
+            userId: user?.profile?.sub,
+            course: priceID.includes('rover') ? 'Rover' : 
+                   priceID.includes('lens') ? 'Lens' : 
+                   priceID.includes('link') ? 'Link' : 'Unknown'
+        });
 
         const config: any = {
             lineItems: [
