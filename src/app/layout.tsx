@@ -3,8 +3,6 @@ import "./globals.css";
 import Providers from '@/context/Providers';
 import { Navbar } from '@/components/Navbar';
 import AuthWrapper from '@/components/AuthWrapper';
-import { initPostHog } from '@/lib/posthog';
-import PostHogPageView from '@/components/PostHogPageView';
 
 export const metadata: Metadata = {
   title: "JamByte",
@@ -16,16 +14,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Initialize PostHog
-  if (typeof window !== 'undefined') {
-    initPostHog();
-  }
-
   return (
     <html lang="en">
       <body>
         <Providers>
-          <PostHogPageView />
           <Navbar />
           {children}
           <AuthWrapper />
