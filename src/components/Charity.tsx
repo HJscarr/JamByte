@@ -1,5 +1,6 @@
 import React from 'react';
 import { AcademicCapIcon, FaceSmileIcon } from '@heroicons/react/24/outline';
+import { useEducationalAid } from '@/hooks/useEducationalAid';
 
 const features = [
   {
@@ -17,6 +18,8 @@ const features = [
 ];
 
 const Charity: React.FC = () => {
+  const { progress, coursesUntilNextGift, loading, error } = useEducationalAid();
+
   return (
     <div className="bg-grey-800 pt-24 pb-28 sm:py-48">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -28,6 +31,28 @@ const Charity: React.FC = () => {
           <p className="mt-6 text-md sm:text-lg leading-8 text-gray-200">
             For every 100 courses sold, one will be gifted to an upskilling charity.
           </p>
+          
+          {/* Progress Bar Section */}
+          <div className="mt-8 max-w-2xl mx-auto">
+            <div className="relative h-8 bg-gray-700 rounded-full overflow-hidden">
+              <div 
+                className="absolute h-full bg-gradient-to-r from-secondary to-red-400 transition-all duration-1000 ease-out"
+                style={{ width: `${progress}%` }}
+              >
+                <div className="absolute inset-0 animate-ripple bg-gradient-to-r from-secondary/30 to-red-400/30" />
+              </div>
+            </div>
+            <p className="mt-4 text-xl text-gray-200">
+              {loading ? (
+                'Loading...'
+              ) : error ? (
+                'Unable to load progress'
+              ) : (
+                `${coursesUntilNextGift} courses away from the next gift`
+              )}
+            </p>
+          </div>
+
           <p className="flex justify-center items-center text-4xl mt-4 leading-8 text-gray-200">
             🎁
           </p>
