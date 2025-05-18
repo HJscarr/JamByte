@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useAiAssistant } from '../hooks/useAiAssistant';
 
 interface ChatMessage {
   role: 'assistant' | 'user' | 'system';
@@ -12,8 +13,8 @@ interface ChatMessage {
 const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const chatbotRef = useRef<HTMLDivElement | null>(null);
+  const { sendMessage, isLoading, error } = useAiAssistant();
 
   // Load chat history from sessionStorage when the component mounts
   useEffect(() => {
@@ -54,17 +55,15 @@ const ChatBot: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setInput('');
-    setIsLoading(true);
     const newMessages: ChatMessage[] = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);
     try {
-      const response = await fetchAPI(newMessages);
+      const response = await sendMessage(newMessages);
       setMessages(prev => [...prev, { role: 'assistant', content: response.content }]);
     } catch (error) {
       console.error("Error fetching answer:", error);
       setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't fetch the answer." }]);
     } finally {
-      setIsLoading(false);
       adjustTextareaHeightToDefault();
     }
   };
@@ -76,22 +75,6 @@ const ChatBot: React.FC = () => {
         handleSubmit(event as unknown as React.FormEvent);
       }
     }
-  };
-
-  const fetchAPI = async (messages: ChatMessage[]) => {
-    const formattedMessages: ChatMessage[] = [
-      { role: 'system', content: "You are a helpful assistant." },
-      ...messages
-    ];
-
-    const response = await fetch('https://megt34rh0i.execute-api.eu-west-1.amazonaws.com/prod/', {
-      method: 'POST',
-      body: JSON.stringify({ messages: formattedMessages }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const data = await response.json();
-    return data.answer;
   };
 
   useEffect(() => {
