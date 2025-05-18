@@ -19,6 +19,7 @@ const UserAuth: React.FC<AuthComponentProps> = ({
   title = 'Sign In'
 }) => {
   const auth = useAuth();
+  const { modalState, setModalState } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -30,6 +31,12 @@ const UserAuth: React.FC<AuthComponentProps> = ({
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [phone, setPhone] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState<'request' | 'confirm'>('request');
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordCode, setForgotPasswordCode] = useState('');
+  const [forgotPasswordNewPassword, setForgotPasswordNewPassword] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState<string | null>(null);
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState<string | null>(null);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,14 +109,79 @@ const UserAuth: React.FC<AuthComponentProps> = ({
     setShowSignUpModal(true);
   };
 
-  const handleForgotPassword = async () => {
+  const handleForgotPassword = () => {
+    setForgotPasswordStep('request');
+    setForgotPasswordEmail(email); // prefill if user typed email
+    setForgotPasswordCode('');
+    setForgotPasswordNewPassword('');
+    setForgotPasswordError(null);
+    setForgotPasswordSuccess(null);
+    setModalState(prev => ({ ...prev, showForgotPasswordModal: true }));
+  };
+
+  const handleForgotPasswordRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError(null);
+    setForgotPasswordSuccess(null);
+    if (!forgotPasswordEmail.trim()) {
+      setForgotPasswordError('Please enter your email.');
+      return;
+    }
     try {
-      const cognitoDomain = "https://your-cognito-domain.auth.eu-west-1.amazoncognito.com";
-      const clientId = "18506g2uv82srnppeqn6bm673d";
-      const redirectUri = encodeURIComponent(`${window.location.origin}/login`);
-      window.location.href = `${cognitoDomain}/forgotPassword?client_id=${clientId}&redirect_uri=${redirectUri}`;
-    } catch (error: any) {
-      console.error('Error with password reset', error);
+      const { CognitoUserPool, CognitoUser } = await import('amazon-cognito-identity-js');
+      const userPool = new CognitoUserPool({
+        UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
+        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!
+      });
+      const cognitoUser = new CognitoUser({
+        Username: forgotPasswordEmail,
+        Pool: userPool
+      });
+      cognitoUser.forgotPassword({
+        onSuccess: () => {
+          setForgotPasswordStep('confirm');
+          setForgotPasswordSuccess('A verification code has been sent to your email.');
+        },
+        onFailure: (err) => {
+          setForgotPasswordError(err.message || 'Failed to send reset code.');
+        }
+      });
+    } catch (err: any) {
+      setForgotPasswordError(err.message || 'Failed to send reset code.');
+    }
+  };
+
+  const handleForgotPasswordConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError(null);
+    setForgotPasswordSuccess(null);
+    if (!forgotPasswordCode.trim() || !forgotPasswordNewPassword.trim()) {
+      setForgotPasswordError('Please enter the code and your new password.');
+      return;
+    }
+    try {
+      const { CognitoUserPool, CognitoUser } = await import('amazon-cognito-identity-js');
+      const userPool = new CognitoUserPool({
+        UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
+        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!
+      });
+      const cognitoUser = new CognitoUser({
+        Username: forgotPasswordEmail,
+        Pool: userPool
+      });
+      cognitoUser.confirmPassword(forgotPasswordCode, forgotPasswordNewPassword, {
+        onSuccess: () => {
+          setForgotPasswordSuccess('Password reset successful! You can now sign in.');
+          setTimeout(() => {
+            setModalState(prev => ({ ...prev, showForgotPasswordModal: false }));
+          }, 2000);
+        },
+        onFailure: (err) => {
+          setForgotPasswordError(err.message || 'Failed to reset password.');
+        }
+      });
+    } catch (err: any) {
+      setForgotPasswordError(err.message || 'Failed to reset password.');
     }
   };
 
@@ -354,6 +426,62 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 Verify Account
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {modalState.showForgotPasswordModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+          <div className="relative bg-white rounded-lg shadow-xl p-8 m-4 max-w-xl w-full">
+            <button
+              onClick={() => setModalState(prev => ({ ...prev, showForgotPasswordModal: false }))}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
+            >
+              <span className="sr-only">Close</span>
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-bold mb-4 text-center">Reset Password</h2>
+            {forgotPasswordStep === 'request' && (
+              <form onSubmit={handleForgotPasswordRequest}>
+                <label className="block text-gray-700 mb-1 text-sm font-medium">Email</label>
+                <input
+                  type="email"
+                  value={forgotPasswordEmail}
+                  onChange={e => setForgotPasswordEmail(e.target.value)}
+                  className="w-full p-2 mb-4 border rounded"
+                  placeholder="Enter your email"
+                />
+                {forgotPasswordError && <p className="text-red-500 mb-4">{forgotPasswordError}</p>}
+                {forgotPasswordSuccess && <p className="text-green-600 mb-4">{forgotPasswordSuccess}</p>}
+                <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">Send Reset Code</button>
+              </form>
+            )}
+            {forgotPasswordStep === 'confirm' && (
+              <form onSubmit={handleForgotPasswordConfirm}>
+                <label className="block text-gray-700 mb-1 text-sm font-medium">Verification Code</label>
+                <input
+                  type="text"
+                  value={forgotPasswordCode}
+                  onChange={e => setForgotPasswordCode(e.target.value)}
+                  className="w-full p-2 mb-4 border rounded"
+                  placeholder="Enter the code from your email"
+                />
+                <label className="block text-gray-700 mb-1 text-sm font-medium">New Password</label>
+                <input
+                  type="password"
+                  value={forgotPasswordNewPassword}
+                  onChange={e => setForgotPasswordNewPassword(e.target.value)}
+                  className="w-full p-2 mb-4 border rounded"
+                  placeholder="Enter your new password"
+                />
+                {forgotPasswordError && <p className="text-red-500 mb-4">{forgotPasswordError}</p>}
+                {forgotPasswordSuccess && <p className="text-green-600 mb-4">{forgotPasswordSuccess}</p>}
+                <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">Reset Password</button>
+              </form>
+            )}
           </div>
         </div>
       )}
