@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAiAssistant } from '../hooks/useAiAssistant';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 interface ChatMessage {
   role: 'assistant' | 'user' | 'system';
@@ -25,7 +26,7 @@ const ChatBot: React.FC = () => {
       setMessages(JSON.parse(savedMessages));
     } else {
       console.log("No saved messages found");
-      setMessages([{ role: 'system', content: 'You are a helpful assistant.' }]);
+      setMessages([]);
     }
   }, []);
 
@@ -92,9 +93,28 @@ const ChatBot: React.FC = () => {
     return content.replace(/\n\n/g, '\n\n&nbsp;\n\n');
   };
 
+  const renderTips = () => {
+    if (messages.length > 0) return null;
+
+    return (
+      <div className="mb-4 p-4 bg-gray-600 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <InformationCircleIcon className="h-5 w-5 text-blue-400" />
+          <h3 className="text-lg font-semibold text-white">How to get the most from AI</h3>
+        </div>
+        <ul className="list-disc list-inside text-gray-200 space-y-1">
+          <li>Make your questions long and detailed with examples if possible</li>
+          <li>Paste pictures into the search box to give a better description</li>
+          <li>Be specific</li>
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div ref={chatbotRef} className="flex flex-col h-full w-full bg-gray-700 my-5 p-5 shadow-lg rounded-lg">
       <div className="flex-grow overflow-y-auto mb-4">
+        {renderTips()}
         {messages.map((msg, index) => (
           <div key={index} className={`mb-2 ${msg.role === 'assistant' ? 'text-left' : 'text-right'}`}>
             <span className={`inline-block py-1 px-3 rounded max-w-2xl ${msg.role === 'assistant' ? 'bg-secondary text-white text-left' : 'bg-gray-500 text-white text-left'}`}>
