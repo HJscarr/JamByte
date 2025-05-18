@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Amplify } from 'aws-amplify';
+import { fetchAuthSession } from 'aws-amplify/auth';
 
 interface ChatMessage {
   role: 'assistant' | 'user' | 'system';
@@ -22,6 +24,14 @@ export const useAiAssistant = () => {
     setError(null);
 
     try {
+      // Get the current session and JWT token
+      const session = await fetchAuthSession();
+      const token = session.tokens?.idToken?.toString();
+
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
       // Convert messages to a single text content
       const textContent = messages
         .map(msg => `${msg.role}: ${msg.content}`)
@@ -29,7 +39,10 @@ export const useAiAssistant = () => {
 
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/ai-assistant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ text_content: textContent }),
       });
 
