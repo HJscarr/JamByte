@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
+import Notification from './Notification';
 
 interface AuthComponentProps {
   showLoginModal: boolean;
@@ -25,6 +26,10 @@ const UserAuth: React.FC<AuthComponentProps> = ({
   const [verificationCode, setVerificationCode] = useState('');
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [phone, setPhone] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +45,29 @@ const UserAuth: React.FC<AuthComponentProps> = ({
 
   const handleSignUp = async (e?: React.FormEvent) => {
     e?.preventDefault();
+    setFormError(null);
+    // Simple validation
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
+      setFormError('Please fill in all required fields.');
+      return;
+    }
+    if (phone && !/^\d{10,11}$/.test(phone)) {
+      setFormError('Phone number must be 10 or 11 digits.');
+      return;
+    }
     try {
-      await auth.signUp(email, password, {
+      const attributes: Record<string, string> = {
         given_name: firstName,
         family_name: lastName,
         email: email
-      });
+      };
+      if (dateOfBirth) {
+        attributes['custom:date_of_birth'] = dateOfBirth;
+      }
+      if (phone) {
+        attributes['custom:phone'] = phone;
+      }
+      await auth.signUp(email, password, attributes);
       setShowSignUpModal(false);
       setShowVerificationModal(true);
       setError(null);
@@ -61,10 +83,17 @@ const UserAuth: React.FC<AuthComponentProps> = ({
       await auth.confirmSignUp(email, verificationCode);
       setShowVerificationModal(false);
       setShowLoginModal(true);
-      alert('Account verified successfully! Please sign in.');
+      setNotification({
+        message: 'Account verified successfully! Please sign in.',
+        type: 'success'
+      });
     } catch (error: any) {
       console.error("Error verifying account", error);
       setError(error.message);
+      setNotification({
+        message: error.message,
+        type: 'error'
+      });
     }
   };
 
@@ -86,6 +115,14 @@ const UserAuth: React.FC<AuthComponentProps> = ({
 
   return (
     <div className="relative z-50">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       {/* Sign In Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
@@ -177,38 +214,102 @@ const UserAuth: React.FC<AuthComponentProps> = ({
             </div>
             <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
             <form onSubmit={handleSignUp}>
-              <input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full p-2 mb-4 border rounded"
-              />
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full p-2 mb-4 border rounded"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2 mb-4 border rounded"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-2 mb-4 border rounded"
-              />
-              {error && <p className="text-red-500 mb-4">{error}</p>}
+              <div className="flex gap-4 mb-4">
+                <div className="w-1/2">
+                  <label className="block text-gray-700 mb-1 text-sm font-medium">
+                    First Name <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                <div className="w-1/2">
+                  <label className="block text-gray-700 mb-1 text-sm font-medium">
+                    Last Name <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1 text-sm font-medium">
+                  Email <span className="text-pink-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1 text-sm font-medium">
+                  Password <span className="text-pink-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1 text-sm font-medium">
+                  Date of Birth <span className="text-gray-400 text-xs">(Optional)</span>
+                </label>
+                <input
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={e => setDateOfBirth(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-400 focus:border-pink-400"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1 text-sm font-medium">
+                  Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
+                </label>
+                <div className="flex items-center">
+                  <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-md text-gray-500 bg-white text-sm h-10">
+                    +44
+                  </span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+                    pattern="\d{10,11}"
+                    maxLength={11}
+                    placeholder="Phone Number"
+                    className="w-full p-2 border border-gray-300 border-l-0 rounded-r-md h-10 focus:ring-pink-400 focus:border-pink-400"
+                  />
+                </div>
+              </div>
+              {formError && <p className="text-red-500 mb-4">{formError}</p>}
               <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">
                 Sign Up
               </button>
+              <div className="flex justify-center mt-4">
+                <button
+                  type="button"
+                  className="text-secondary hover:text-pink-700 text-sm font-semibold"
+                  onClick={() => {
+                    setShowSignUpModal(false);
+                    setShowLoginModal(true);
+                  }}
+                >
+                  Return to Login
+                </button>
+              </div>
             </form>
           </div>
         </div>

@@ -31,12 +31,12 @@ export default function About() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="mx-auto max-w-2xl lg:mx-0">
-              <h2 className="text-4xl font-bold tracking-tight text-secondary sm:text-6xl">Inspiring a generation</h2>
+              <h2 className="text-4xl font-bold tracking-tight text-secondary sm:text-5xl">What does JamByte mean?</h2>
               <p className="mt-6 text-lg leading-8 text-gray-300">
-                Our aim is to inspire a love for technology in as many individuals across the country as possible; empowering them to solve the problems we face as a species.
+                We first started building our prototypes with Raspberry Pi's, metaphorically turning them into Jam! 
               </p>
               <p className="mt-6 text-lg leading-8 text-gray-300">
-                We want to enable the next generation of creators to make a better world for everyone.
+                In our courses we break down informations into Byte (8 bits) sized pieces, so you can learn at your own pace.
               </p>
             </div>
             <div className="relative h-[200px] lg:h-[300px] rounded-xl overflow-hidden">
