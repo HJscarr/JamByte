@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Amplify } from 'aws-amplify';
-import { fetchAuthSession } from 'aws-amplify/auth';
+import { CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 
 interface ChatMessage {
   role: 'assistant' | 'user' | 'system';
@@ -24,13 +23,25 @@ export const useAiAssistant = () => {
     setError(null);
 
     try {
-      // Get the current session and JWT token
-      const session = await fetchAuthSession();
-      const token = session.tokens?.idToken?.toString();
+      // Get Cognito session and token
+      const userPool = new CognitoUserPool({
+        UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
+        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!
+      });
 
-      if (!token) {
-        throw new Error('No authentication token available');
+      const cognitoUser = userPool.getCurrentUser();
+      if (!cognitoUser) {
+        throw new Error('User not authenticated');
       }
+
+      const session = await new Promise<CognitoUserSession>((resolve, reject) => {
+        cognitoUser.getSession((err: Error | null, session: CognitoUserSession) => {
+          if (err) reject(err);
+          else resolve(session);
+        });
+      });
+
+      const token = session.getIdToken().getJwtToken();
 
       // Convert messages to a single text content
       const textContent = messages
@@ -41,7 +52,8 @@ export const useAiAssistant = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Origin': window.location.origin,
         },
         body: JSON.stringify({ text_content: textContent }),
       });
