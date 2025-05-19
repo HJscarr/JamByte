@@ -39,7 +39,17 @@ export const useVideoFeedback = () => {
       });
 
       statusCode = response.status;
-      const data: VideoFeedbackResponse = await response.json();
+      let data: VideoFeedbackResponse;
+      
+      try {
+        data = await response.json();
+      } catch (e) {
+        // If JSON parsing fails, treat the response as a success message
+        data = {
+          success: true,
+          message: 'Feedback submitted successfully.'
+        };
+      }
 
       if (statusCode === 200) {
         setIsSuccess(true);
