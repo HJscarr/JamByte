@@ -1,53 +1,35 @@
 import { useState } from 'react';
+import { useVideoFeedback } from '../hooks/useVideoFeedback';
+import { useAuth } from '@/context/AuthContext';
 
 type FeedbackProps = {
   currentVideoName: string;
-  currentVideoNumber: string; // Adding the currentVideoNumber prop
+  currentVideoNumber: string;
 };
 
 export const Feedback = ({ currentVideoName, currentVideoNumber }: FeedbackProps) => {
   const [feedback, setFeedback] = useState('');
-  const [statusMessage, setStatusMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(true);  // new state to determine success
-  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false); // New state for feedback loading
+  const { user, isAuthenticated } = useAuth();
+  const { submitVideoFeedback, isLoading, statusMessage, isSuccess } = useVideoFeedback();
 
-
-  const videoFeedback = async (videoName: any, number: any, feedback: any) => {
-    setIsLoadingFeedback(true); // Set loading state when starting feedback submission
-    let statusCode = 0;
-    try {
-      const response = await fetch('https://oglp2c7cki.execute-api.eu-west-1.amazonaws.com/default/videoFeedback', {
-      mode: 'cors',
-      method: 'PUT',
-      body: JSON.stringify({
-        videoName: videoName,
-        Number: number,  // Including the Number in the request body
-        feedback: feedback,
-      }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    });
-    statusCode = response.status;
-      await response.json();
-    } catch (err:any) {
-      console.log(err.message);
-    } finally {
-      setIsLoadingFeedback(false);  // Ensure the loading state is reset no matter the outcome
+  const handleFeedbackSubmit = async () => {
+    if (!isAuthenticated || !user?.profile) {
+      console.error('User not authenticated');
+      return;
     }
 
-    if (statusCode === 200) {
-      setIsSuccess(true);
-      setStatusMessage('Feedback submitted successfully.');
-      setFeedback('');
-    } else {
-      setIsSuccess(false);
-      setStatusMessage('Failed to submit feedback. Please try again.');
+    await submitVideoFeedback(
+      currentVideoName,
+      currentVideoNumber,
+      feedback,
+      user.profile.email,
+      user.profile.given_name || '',
+      user.profile.family_name || ''
+    );
+    
+    if (isSuccess) {
+      setFeedback(''); // Clear feedback only on success
     }
-  };
-
-  const handleFeedbackSubmit = () => {
-    videoFeedback(currentVideoName, currentVideoNumber, feedback); // Pass the currentVideoNumber as an argument
   };
 
   return (
@@ -65,10 +47,10 @@ export const Feedback = ({ currentVideoName, currentVideoNumber }: FeedbackProps
         />
         <button 
           onClick={handleFeedbackSubmit} 
-          className={`absolute bottom-2 right-2 px-4 py-2 ${isLoadingFeedback ? 'bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500' : 'bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500'} text-white rounded`}
-          disabled={isLoadingFeedback} // Disable button while loading
+          className={`absolute bottom-2 right-2 px-4 py-2 ${isLoading ? 'bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500' : 'bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500'} text-white rounded`}
+          disabled={isLoading || !isAuthenticated}
         >
-          {isLoadingFeedback ? (
+          {isLoading ? (
             <>
               <span className="ellipsis-dot">.</span>
               <span className="ellipsis-dot">.</span>
@@ -85,5 +67,5 @@ export const Feedback = ({ currentVideoName, currentVideoNumber }: FeedbackProps
     </div>
   );
 };
-  
+
 export default Feedback;

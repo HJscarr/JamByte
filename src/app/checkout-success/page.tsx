@@ -16,7 +16,7 @@ export default function CheckoutSuccess() {
                     Thank you for your purchase. A confirmation email has been sent to your email address.
                 </p>
                 <p className="mt-8 text-lg text-white">
-                    You can now view the premium course content and you will receive shipping email once your box of electronics is on its way.
+                    You can now view the premium course content and you will receive a shipping email once your box of electronics is on its way.
                 </p>
                 <p className="mt-8 text-lg text-white">
                     Note: If you completed checkout as a guest, please check your email to complete your sign-up process!

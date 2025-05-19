@@ -11,7 +11,23 @@ interface ChatMessage {
   content: string;
 }
 
-const ChatBot: React.FC = () => {
+interface Lesson {
+  title: string;
+  number: number;
+  description: string;
+  length: number;
+  feedback: string;
+  muxid: string;
+  private: boolean;
+}
+
+interface ChatBotProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentLesson: Lesson;
+}
+
+const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose, currentLesson }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>('');
   const chatbotRef = useRef<HTMLDivElement | null>(null);
@@ -81,13 +97,13 @@ const ChatBot: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (chatbotRef.current && !chatbotRef.current.contains(event.target as Node)) {
-        console.log("Clicked outside of the chatbot!");
+        onClose();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [onClose]);
 
   const preprocessContent = (content: string) => {
     return content.replace(/\n\n/g, '\n\n&nbsp;\n\n');
@@ -111,28 +127,39 @@ const ChatBot: React.FC = () => {
     );
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div ref={chatbotRef} className="flex flex-col h-full w-full bg-gray-700 my-5 p-5 shadow-lg rounded-lg">
-      <div className="flex-grow overflow-y-auto mb-4">
-        {renderTips()}
-        {messages.map((msg, index) => (
-          <div key={index} className={`mb-2 ${msg.role === 'assistant' ? 'text-left' : 'text-right'}`}>
-            <span className={`inline-block py-1 px-3 rounded max-w-2xl ${msg.role === 'assistant' ? 'bg-secondary text-white text-left' : 'bg-gray-500 text-white text-left'}`}>
-              {msg.role === 'assistant' ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {preprocessContent(msg.content)}
-                </ReactMarkdown>
-              ) : (
-                msg.content
-              )}
-            </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black opacity-50"></div>
+      <div className="bg-transparent p-5 mx-auto my-0 w-9/12 h-5/6">
+        <div ref={chatbotRef} className="relative z-10 bg-gray-900 shadow-lg rounded-lg w-full h-full flex flex-col">
+          <button 
+            className="absolute top-0 right-0 mt-[-12px] mr-[-12px] bg-red-500 px-4 py-2 rounded-full text-white" 
+            onClick={onClose}
+          >
+            &times;
+          </button>
+          <div className="flex-grow overflow-y-auto mb-4 p-4">
+            {renderTips()}
+            {messages.map((msg, index) => (
+              <div key={index} className={`mb-2 ${msg.role === 'assistant' ? 'text-left' : 'text-right'}`}>
+                <span className={`inline-block py-1 px-3 rounded max-w-2xl ${msg.role === 'assistant' ? 'bg-secondary text-white text-left' : 'bg-gray-500 text-white text-left'}`}>
+                  {msg.role === 'assistant' ? (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {preprocessContent(msg.content)}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <form onSubmit={handleSubmit} className="flex items-end">
-        <>
-          <style>
-            {`
+          <form onSubmit={handleSubmit} className="flex items-end p-4">
+            <>
+              <style>
+                {`
       .custom-scrollbar::-webkit-scrollbar {
         width: 8px;
       }
@@ -151,32 +178,34 @@ const ChatBot: React.FC = () => {
         scrollbar-color: rgba(156, 163, 175, 0.5);
       }
     `}
-          </style>
+              </style>
 
-          <textarea
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            className="chatbot-textarea flex-grow p-2 bg-transparent text-white placeholder-gray-400 border border-secondary rounded resize-none overflow-y-auto custom-scrollbar"
-            placeholder="Send a message..."
-            rows={1}
-            style={{ minHeight: '50px', maxHeight: '200px', paddingTop: '10px', paddingBottom: '10px' }}
-          ></textarea>
-        </>
-        <button
-          type="submit"
-          className={`px-4 h-10 text-white rounded-r-md h-[50px] ${isLoading ? 'bg-secondary' : 'bg-secondary hover:bg-pink-700'}`}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <span className="ellipsis-dot">.</span>
-              <span className="ellipsis-dot">.</span>
-              <span className="ellipsis-dot">.</span>
+              <textarea
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                className="chatbot-textarea flex-grow p-2 bg-transparent text-white placeholder-gray-400 border border-secondary rounded resize-none overflow-y-auto custom-scrollbar"
+                placeholder="Send a message..."
+                rows={1}
+                style={{ minHeight: '50px', maxHeight: '200px', paddingTop: '10px', paddingBottom: '10px' }}
+              ></textarea>
             </>
-          ) : 'Send'}
-        </button>
-      </form>
+            <button
+              type="submit"
+              className={`px-4 h-10 text-white rounded-r-md h-[50px] ${isLoading ? 'bg-secondary' : 'bg-secondary hover:bg-pink-700'}`}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="ellipsis-dot">.</span>
+                  <span className="ellipsis-dot">.</span>
+                  <span className="ellipsis-dot">.</span>
+                </>
+              ) : 'Send'}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

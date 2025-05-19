@@ -2,17 +2,20 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, PlayCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
 
-interface lesson {
+interface Lesson {
   title: string;
+  number: number;
   description: string;
-  video: string;
-  length: string;
+  length: number;
+  feedback: string;
+  muxid: string;
+  private: boolean;
 }
 
 interface LessonListProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  lessons: lesson[];
+  lessons: Lesson[];
   setSelectedLesson: (index: number) => void;
   currentIndex: number;
   thumbnails: Record<string, string>;
@@ -71,15 +74,15 @@ export const LessonList: React.FC<LessonListProps> = ({ open, setOpen, lessons, 
                   <div className="flex h-full flex-col overflow-y-auto bg-gray-900 shadow-xl max-h-[100vh] pb-8">
                     <div className="pt-6 px-4 sm:px-6 mb-3">
                       <Dialog.Title className="text-base font-semibold leading-6 text-gray-100">
-                        lesson List
+                        Lesson List
                       </Dialog.Title>
                       <div className="h-0.5 mt-2 bg-gray-100"></div>
                     </div>
 
-                    {/* lesson List */}
+                    {/* Lesson List */}
                     {lessons.map((lesson, index) => (
                       <div 
-                        key={`lesson-${index}`} // Added unique key prop
+                        key={`lesson-${index}`}
                         className={`group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-700 ${currentIndex === index ? "bg-gray-800" : ""}`}
                         onClick={() => setSelectedLesson(index)}
                       >
@@ -93,7 +96,7 @@ export const LessonList: React.FC<LessonListProps> = ({ open, setOpen, lessons, 
                           </a>
                           <div className="flex items-center mt-1 gap-1">
                             <ClockIcon className="h-4 w-4 text-gray-200" aria-hidden="true" />
-                            <p className="text-gray-200">{lesson.length}</p>
+                            <p className="text-gray-200">{Math.round(lesson.length)} min</p>
                           </div>
                         </div>
                       </div>
