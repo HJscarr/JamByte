@@ -294,15 +294,15 @@ const Lesson: React.FC = () => {
       </div>
 
       <div className='container mx-auto flex w-9/12 sm:w-3/5 flex-col'>
-        <div className='w-full'>
+        <div className="text-base text-gray-400 text-left mt-8">
+          <LessonDesc key={currentLesson.title} {...currentLesson} />
+        </div>
+
+        <div className='w-full mt-8'>
           <Feedback 
             currentVideoName={currentLesson.title} 
             currentVideoNumber={currentLesson.number?.toString() || ''} 
           />
-        </div>
-
-        <div className="text-base text-gray-400 text-left mt-8">
-          <LessonDesc key={currentLesson.title} {...currentLesson} />
         </div>
 
         <div className='text-base text-gray-400 text-left'></div>
