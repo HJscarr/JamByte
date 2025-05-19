@@ -100,8 +100,8 @@ export default function BoxAndDesc({ title, description, imageUrl, productID }: 
                 £74
               </p>
               <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-2 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
-                Free Shipping
-                <CheckCircleIcon className="ml-1 h-4 w-4" />
+                Free Shipping & 30 Day Money Back Guarantee
+                <CheckCircleIcon className="ml-1 h-5 w-5" />
               </span>
             </div>
 
