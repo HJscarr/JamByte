@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import getStripe from './useStripe';
+import { captureEvent } from '@/lib/posthog';
 
 interface CheckoutConfig {
   priceId: string;
   successUrl: string;
   cancelUrl: string;
+}
+
+interface CheckoutResponse {
+  sessionId?: string;
+  error?: string;
 }
 
 export const useCheckout = () => {
@@ -23,23 +29,26 @@ export const useCheckout = () => {
         throw new Error('Stripe failed to load');
       }
 
-      const config: any = {
+      // Track checkout initiation
+      captureEvent('checkout_initiated', {
+        priceId,
+        userId: user?.profile?.sub,
+        course: priceId.includes('rover') ? 'Rover' : 
+               priceId.includes('lens') ? 'Lens' : 
+               priceId.includes('link') ? 'Link' : 'Unknown'
+      });
+
+      const config = {
         lineItems: [
           {
-            price: priceId,
-            quantity: 1,
-          },
+            price: priceId
+          }
         ],
-        mode: 'payment',
         successUrl,
-        cancelUrl,
+        cancelUrl
       };
 
-      if (user?.profile?.email) {
-        config.customerEmail = user.profile.email;
-      }
-
-      const response = await fetch('https://6hustu0f4i.execute-api.eu-west-1.amazonaws.com/prod', {
+      const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/stripe-checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,11 +63,20 @@ export const useCheckout = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const session = await response.json();
+      const data: CheckoutResponse = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.sessionId) {
+        throw new Error('No session ID received from server');
+      }
+
       localStorage.setItem('checkoutSuccess', 'true');
       
       const result = await stripe.redirectToCheckout({
-        sessionId: session.sessionId,
+        sessionId: data.sessionId,
       });
 
       if (result.error) {

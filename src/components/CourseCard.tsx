@@ -1,14 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ShoppingCartIcon, RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
+import { RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { useCheckPurchase } from '@/hooks/useCheckPurchase';
-import { useCheckout } from '@/hooks/useCheckout';
-import CheckoutHandler from './CheckoutHandler';
+import CheckoutButton from './CheckoutButton';
 import StockChecker from './StockChecker';
 
 interface CourseProps {
@@ -27,9 +25,7 @@ interface CourseProps {
 
 const CourseCard: React.FC<CourseProps> = ({ 
   title, 
-  description, 
   imageUrl, 
-  mobileImageUrl, 
   details, 
   showActions = true, 
   priceID, 
@@ -40,7 +36,6 @@ const CourseCard: React.FC<CourseProps> = ({
   const { user, modalState, setModalState } = useAuth();
   const [successUrl, setSuccessUrl] = useState<string>('');
   const { hasBought } = useCheckPurchase(title);
-  const { handleCheckout, isLoading, error } = useCheckout();
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);
@@ -50,14 +45,6 @@ const CourseCard: React.FC<CourseProps> = ({
     if (!user) {
       setModalState(prev => ({ ...prev, showLoginModal: true }));
       return;
-    }
-
-    if (priceID) {
-      handleCheckout({
-        priceId: priceID,
-        successUrl,
-        cancelUrl: `${window.location.origin}/Pi-Guard`,
-      });
     }
   };
 
@@ -132,6 +119,14 @@ const CourseCard: React.FC<CourseProps> = ({
               <StockChecker title={title} />
             )}
           </div>
+
+          {priceID && !hasBought && (
+            <CheckoutButton
+              priceId={priceID}
+              successUrl={successUrl}
+              cancelUrl={`${window.location.origin}/Pi-Guard`}
+            />
+          )}
         </div>
       </div>
     </div>

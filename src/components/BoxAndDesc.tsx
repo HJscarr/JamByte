@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { StarIcon } from '@heroicons/react/20/solid';
 import { RocketLaunchIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
-import CheckoutHandler from './CheckoutHandler';
+import CheckoutButton from './CheckoutButton';
 import StockChecker from './StockChecker';
 import { useHasBought } from '@/hooks/useHasBought';
 
@@ -149,8 +149,8 @@ export default function BoxAndDesc({ title, description, imageUrl, productID }: 
                     </Link>
                   </>
                 ) : productID ? (
-                  <CheckoutHandler
-                    priceID={productID}
+                  <CheckoutButton
+                    priceId={productID}
                     successUrl={successUrl}
                     cancelUrl={`${baseUrl}/${title.toLowerCase().replace(/\s+/g, '-')}`}
                   />

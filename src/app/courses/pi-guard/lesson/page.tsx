@@ -319,7 +319,8 @@ const Lesson: React.FC = () => {
           />
         </div>
 
-        <div className='w-full mt-8'>
+        <div className='w-full mt-2 mb-4'>
+          <h2 className="text-lg font-semibold text-white mb-2">Send us your feedback on this lesson or course:</h2>
           <Feedback 
             currentVideoName={currentLesson.title} 
             currentVideoNumber={currentLesson.number?.toString() || ''} 
