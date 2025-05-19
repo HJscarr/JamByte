@@ -12,6 +12,7 @@ export default function RoverPage() {
   return (
     <div className="container mx-auto p-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
       <h1 className="text-4xl font-bold text-white mb-2">Course in construction 👷</h1>
+      <p className="text-lg text-gray-200 mb-3 mt-3">{course?.details}</p>
       <p className="text-lg text-gray-200 mb-6">Register below to be the first to know when Rover is released!</p>
       <div className="w-full max-w-4xl mb-8">
         <Image 
@@ -21,6 +22,18 @@ export default function RoverPage() {
           height={300}
           className="w-full h-auto rounded-lg shadow-lg"
         />
+      </div>
+      <div className="w-full max-w-4xl mb-8">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="w-full h-auto rounded-lg shadow-lg"
+        >
+          <source src="/img/Rover/rover.webm" type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
       </div>
       {registered && user ? (
         <GradientButton className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800">
@@ -39,4 +52,4 @@ export default function RoverPage() {
       )}
     </div>
   );
-} 
+}

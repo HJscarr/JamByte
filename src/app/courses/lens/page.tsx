@@ -12,6 +12,7 @@ export default function LensPage() {
   return (
     <div className="container mx-auto p-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
       <h1 className="text-4xl font-bold text-white mb-2">Course in construction 👷</h1>
+      <p className="text-lg text-gray-200 mb-3 mt-3">{course?.details}</p>
       <p className="text-lg text-gray-200 mb-6">Register below to be the first to know when Lens is released!</p>
       <div className="w-full max-w-4xl mb-8">
         <Image 
