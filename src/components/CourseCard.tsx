@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { RocketLaunchIcon, BellIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
-import { useCheckPurchase } from '@/hooks/useCheckPurchase';
+import { useHasBought } from '@/hooks/useHasBought';
 import CheckoutButton from './CheckoutButton';
 import StockChecker from './StockChecker';
 
@@ -35,7 +35,7 @@ const CourseCard: React.FC<CourseProps> = ({
   const router = useRouter();
   const { user, modalState, setModalState } = useAuth();
   const [successUrl, setSuccessUrl] = useState<string>('');
-  const { hasBought } = useCheckPurchase(title);
+  const { data: hasBought = false } = useHasBought(title);
 
   useEffect(() => {
     setSuccessUrl(`${window.location.origin}/checkout-success`);

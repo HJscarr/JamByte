@@ -10,15 +10,25 @@ export const useHasBought = (productName: string) => {
       if (!isAuthenticated || !user?.profile.email) return false;
 
       const response = await fetch(
-        `https://5obqo07nr8.execute-api.eu-west-1.amazonaws.com/Prod/?email=${user.profile.email}`
+        `https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/get-users-courses?email=${encodeURIComponent(user.profile.email)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Origin': window.location.origin,
+          },
+          mode: 'cors',
+        }
       );
       
-      if (!response.ok) throw new Error("Failed to fetch purchase status");
+      if (!response.ok) {
+        throw new Error("Failed to fetch purchase status");
+      }
       
       const data = await response.json();
       return Array.isArray(data) && data.includes(productName);
     },
     enabled: !!isAuthenticated && !!user?.profile.email,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: Infinity,
   });
 }; 

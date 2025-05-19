@@ -1,7 +1,22 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import getStripe from './useStripe';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { captureEvent } from '@/lib/posthog';
+
+let stripePromise: Promise<Stripe | null>;
+
+const getStripe = (): Promise<Stripe | null> => {
+  if (!stripePromise) {
+    const apiKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
+    if (typeof apiKey !== 'string') {
+      throw new Error("Stripe API key is not correctly configured");
+    }
+
+    stripePromise = loadStripe(apiKey);
+  }
+  return stripePromise;
+};
 
 interface CheckoutConfig {
   priceId: string;
