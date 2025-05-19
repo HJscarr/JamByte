@@ -9,6 +9,7 @@ interface CognitoUserProfile {
   email: string;
   given_name?: string;
   family_name?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
@@ -93,6 +94,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 case 'family_name':
                   profile.family_name = attr.getValue();
                   break;
+                case 'custom:phone':
+                  profile.phone = attr.getValue();
+                  break;
               }
             });
 
@@ -145,6 +149,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   break;
                 case 'family_name':
                   profile.family_name = attr.getValue();
+                  break;
+                case 'custom:phone':
+                  profile.phone = attr.getValue();
                   break;
               }
             });

@@ -45,7 +45,12 @@ export const useCheckout = () => {
           }
         ],
         successUrl,
-        cancelUrl
+        cancelUrl,
+        // Include user information if available
+        email: user?.profile?.email,
+        firstName: user?.profile?.given_name,
+        lastName: user?.profile?.family_name,
+        phone: user?.profile?.phone
       };
 
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/stripe-checkout', {

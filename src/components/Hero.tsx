@@ -4,7 +4,6 @@ import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { RocketLaunchIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { DotLottieReact, DotLottie } from '@lottiefiles/dotlottie-react';
-import Lottie from 'lottie-react';
 import desktopAnimation from '@/images/lottie/Desktop-Hero.lottie';
 import mobileAnimation from '@/images/lottie/Mobile-Hero.lottie';
 import { useHasBought } from '@/hooks/useHasBought';
