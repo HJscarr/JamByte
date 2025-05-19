@@ -195,7 +195,7 @@ const Lesson: React.FC = () => {
         <div className="ml-auto pt-20 w-full h-3/5 flex flex-col items-center justify-between relative">
           {isDataLoaded ? (
             <>
-              <div className="w-full" style={{ aspectRatio: '16/9', borderRadius: '10px', overflow: 'hidden' }}>
+              <div className="w-full" style={{ aspectRatio: '16/9' }}>
                 {currentLesson?.muxid && (
                   <>
                     {!videoUrl ? (
@@ -227,66 +227,109 @@ const Lesson: React.FC = () => {
               {countdown > 0 && (
                 <div className="absolute z-30 flex flex-col items-center justify-center top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-50 rounded-lg p-4">
                   <button onClick={goToNextVideo} className="focus:outline-none">
-                    <span className="text-white text-2xl">Next video in {countdown}s</span>
+                    <svg viewBox="0 0 100 100" className="w-20 h-20">
+                      <path
+                        fill="none"
+                        stroke="#FFF"
+                        strokeWidth="5"
+                        strokeDasharray="251.2"
+                        strokeDashoffset={`${251.2 - (countdown / 8) * 251.2}`}
+                        d="M50 10 a 40 40 0 0 1 0 80 a 40 40 0 0 1 0 -80"
+                      />
+                      <polygon points="40,30 40,70 70,50" fill="white"/>
+                    </svg>
                   </button>
+                  <div className="text-white text-xl mt-2">
+                    {`Next video starts in: ${countdown}`}
+                  </div>
                 </div>
               )}
-              <div className="flex justify-between w-full mt-4">
-                <button
-                  onClick={goToPreviousVideo}
-                  disabled={currentIndex === 0}
-                  className={`px-4 py-2 rounded ${
-                    currentIndex === 0
-                      ? 'bg-gray-300 cursor-not-allowed'
-                      : 'bg-secondary hover:bg-secondary-dark'
-                  }`}
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={goToNextVideo}
-                  disabled={currentIndex === lessons.length - 1}
-                  className={`px-4 py-2 rounded ${
-                    currentIndex === lessons.length - 1
-                      ? 'bg-gray-300 cursor-not-allowed'
-                      : 'bg-secondary hover:bg-secondary-dark'
-                  }`}
-                >
-                  Next
-                </button>
-              </div>
             </>
           ) : (
-            <div>Loading...</div>
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="animate-rotate rounded-full h-32 w-32 border-t-2 border-b-2 border-solid border-secondary"></div>
+              <p className="text-white mt-4">Please log in to view video</p>
+            </div>
           )}
+
+          <div className="flex flex-row justify-between w-full items-center">
+            <div className="text-left w-1/3">
+              <h1 className="text-2xl font-bold text-white pb-2 mt-8 whitespace-nowrap">
+                {currentLesson.title}
+              </h1>
+              <span>
+                <h1 className="text-l font-bold text-white whitespace-nowrap">
+                  <span>Pi-Guard - A </span>
+                  <span className="bg-gradient-to-r from-secondary to-red-400 inline-block text-transparent bg-clip-text">JamByte</span>
+                  <span> Course </span>
+                </h1>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-center space-x-4 w-1/3">
+              <button 
+                className="text-white px-4 py-2 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
+                onClick={goToPreviousVideo}
+              >
+                👈&nbsp;Prev
+              </button>
+              <button 
+                className="text-white px-4 py-2 rounded bg-gradient-to-r from-secondary to-red-400 hover:from-pink-500 hover:to-red-500" 
+                onClick={goToNextVideo}
+              >
+                Next&nbsp;👉
+              </button>
+            </div>
+
+            <div className="flex justify-end w-1/3">
+              <button 
+                className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white px-5 sm:px-6 py-2 sm:py-3 sm:text-sm rounded" 
+                onClick={() => setAIAssistantOpen(!isAIAssistantOpen)}
+              >
+                AI&nbsp;Assistant&nbsp;✨
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="container mx-auto w-9/12 sm:w-3/5">
-        <div className="w-full">
+      <div className='container mx-auto flex w-9/12 sm:w-3/5 flex-col'>
+        <div className='w-full'>
           <Feedback 
-            currentVideoName={currentLesson.title || ''} 
-            currentVideoNumber={currentLesson.number?.toString() || ''}
+            currentVideoName={currentLesson.title} 
+            currentVideoNumber={currentLesson.number?.toString() || ''} 
           />
         </div>
 
         <div className="text-base text-gray-400 text-left mt-8">
-          <LessonDesc
-            title={currentLesson.title}
-            description={currentLesson.description}
-          />
+          <LessonDesc key={currentLesson.title} {...currentLesson} />
+        </div>
+
+        <div className='text-base text-gray-400 text-left'></div>
+      </div>
+
+      <div className={`fixed inset-0 z-50 flex items-center justify-center ${isAIAssistantOpen ? '' : 'hidden'}`}>
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="bg-transparent p-5 mx-auto my-0 w-9/12 h-5/6">
+          <div className="relative z-10 bg-gray-900 shadow-lg rounded-lg w-full h-full">
+            <button 
+              className="absolute top-0 right-0 mt-[-12px] mr-[-12px] bg-red-500 px-4 py-2 rounded-full text-white" 
+              onClick={() => setAIAssistantOpen(false)}
+            >
+              &times;
+            </button>
+            <ChatBot 
+              isOpen={isAIAssistantOpen}
+              onClose={() => setAIAssistantOpen(false)}
+              currentLesson={currentLesson}
+            />
+          </div>
         </div>
       </div>
 
-      <ChatBot
-        isOpen={isAIAssistantOpen}
-        onClose={() => setAIAssistantOpen(false)}
-        currentLesson={currentLesson}
-      />
-
-      <EndOfSeriesModal
-        isOpen={showEndOfSeriesModal}
-        onClose={() => setShowEndOfSeriesModal(false)}
+      <EndOfSeriesModal 
+        isOpen={showEndOfSeriesModal} 
+        onClose={() => setShowEndOfSeriesModal(false)} 
       />
     </div>
   );
