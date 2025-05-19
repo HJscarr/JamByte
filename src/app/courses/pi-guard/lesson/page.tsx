@@ -10,6 +10,7 @@ import { Bars3Icon } from '@heroicons/react/20/solid';
 import { useAuth } from '@/context/AuthContext';
 import EndOfSeriesModal from '@/components/EndOfSeriesModal';
 import { useFetchLessons } from '@/hooks/useFetchLessons';
+import { useFetchMuxToken } from '@/hooks/useFetchMuxToken';
 
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false });
 
@@ -26,35 +27,7 @@ const Lesson: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [privateVideoTokens, setPrivateVideoTokens] = useState<Record<string, string>>({});
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
-
-  const fetchPrivateVideoToken = async (playbackId: string) => {
-    if (!user?.profile.email) {
-      console.error("No user email available");
-      return null;
-    }
-
-    try {
-      const response = await fetch(
-        `https://cfwu42mnu0.execute-api.eu-west-1.amazonaws.com/production?email=${encodeURIComponent(user.profile.email)}&playback_id=${playbackId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch Mux token');
-      }
-      
-      const { token } = await response.json();
-      return token;
-    } catch (error) {
-      console.error("Error fetching Mux token:", error);
-      return null;
-    }
-  };
+  const { fetchMuxToken } = useFetchMuxToken();
 
   const fetchThumbnail = async (lesson: any) => {
     if (!lesson?.muxid) return null;
@@ -74,7 +47,7 @@ const Lesson: React.FC = () => {
     const thumbnailUrls: Record<string, string> = {};
 
     for (const lesson of privateVideos) {
-      const token = await fetchPrivateVideoToken(lesson.muxid);
+      const token = await fetchMuxToken(lesson.muxid);
       if (token) {
         tokens[lesson.muxid] = token;
         const thumbnail = await fetchThumbnail({ ...lesson, private: true });
