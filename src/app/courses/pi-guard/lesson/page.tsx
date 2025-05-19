@@ -169,7 +169,24 @@ const Lesson: React.FC = () => {
   }
 
   if (isLessonsLoading) {
-    return <div>Loading lessons...</div>;
+    return (
+      <div className="container mx-auto flex mb-10 relative w-9/12 sm:w-3/5 mt-[-45px]">
+        <div className="ml-auto pt-20 w-full h-3/5 flex flex-col items-center justify-between relative">
+          {/* Video skeleton */}
+          <div className="w-full bg-gray-800 animate-pulse rounded" style={{ aspectRatio: '16/9' }} />
+          {/* Title skeleton */}
+          <div className="w-1/2 h-8 bg-gray-700 rounded mt-8 animate-pulse self-start" />
+          {/* Subtitle skeleton */}
+          <div className="w-1/3 h-6 bg-gray-700 rounded mt-2 animate-pulse self-start" />
+          {/* Description skeleton (3 lines) */}
+          <div className="w-full flex flex-col gap-2 mt-8">
+            <div className="w-full h-4 bg-gray-700 rounded animate-pulse" />
+            <div className="w-5/6 h-4 bg-gray-700 rounded animate-pulse" />
+            <div className="w-2/3 h-4 bg-gray-700 rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -295,7 +312,11 @@ const Lesson: React.FC = () => {
 
       <div className='container mx-auto flex w-9/12 sm:w-3/5 flex-col'>
         <div className="text-base text-gray-400 text-left mt-8">
-          <LessonDesc key={currentLesson.title} {...currentLesson} />
+          <LessonDesc 
+            key={currentLesson.title}
+            title={currentLesson.title}
+            description={currentLesson.description}
+          />
         </div>
 
         <div className='w-full mt-8'>
