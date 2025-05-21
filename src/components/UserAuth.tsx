@@ -82,7 +82,22 @@ const UserAuth: React.FC<AuthComponentProps> = ({
       console.error("Error signing up", error);
       // Check if the error is related to password validation
       if (error.message && error.message.toLowerCase().includes('password')) {
-        setFormError(error.message);
+        // Handle different password validation cases
+        if (error.message.includes('regular expression pattern')) {
+          setFormError('Password must be at least 8 characters long and contain at least one letter and one number.');
+        } else if (error.message.includes('length')) {
+          setFormError('Password must be at least 8 characters long.');
+        } else if (error.message.includes('uppercase')) {
+          setFormError('Password must contain at least one uppercase letter.');
+        } else if (error.message.includes('lowercase')) {
+          setFormError('Password must contain at least one lowercase letter.');
+        } else if (error.message.includes('number')) {
+          setFormError('Password must contain at least one number.');
+        } else if (error.message.includes('symbol')) {
+          setFormError('Password must contain at least one special character.');
+        } else {
+          setFormError('Password does not meet the requirements. Please ensure it is at least 8 characters long and contains a mix of letters, numbers, and special characters.');
+        }
       } else {
         setError(error.message);
       }
