@@ -80,7 +80,12 @@ const UserAuth: React.FC<AuthComponentProps> = ({
       setError(null);
     } catch (error: any) {
       console.error("Error signing up", error);
-      setError(error.message);
+      // Check if the error is related to password validation
+      if (error.message && error.message.toLowerCase().includes('password')) {
+        setFormError(error.message);
+      } else {
+        setError(error.message);
+      }
     }
   };
 
@@ -335,6 +340,7 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-2 border rounded"
                 />
+                {formError && <p className="text-red-500 text-sm mt-1">{formError}</p>}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 mb-1 text-sm font-medium">
@@ -366,7 +372,6 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                   />
                 </div>
               </div>
-              {formError && <p className="text-red-500 mb-4">{formError}</p>}
               <button type="submit" className="w-full bg-secondary text-white rounded-md py-2 px-4 hover:bg-pink-700">
                 Sign Up
               </button>

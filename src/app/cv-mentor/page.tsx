@@ -77,6 +77,25 @@ export default function CVHelperPage() {
                         handleLoginClick();
                       }
                     }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
+                      if (!user) {
+                        handleLoginClick();
+                        return;
+                      }
+
+                      const droppedFile = e.dataTransfer.files?.[0];
+                      if (droppedFile && (droppedFile.type === 'application/pdf' || droppedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+                        setFile(droppedFile);
+                        processCV(droppedFile);
+                      }
+                    }}
                   >
                     <input
                       id="cv-upload"
