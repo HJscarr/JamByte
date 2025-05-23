@@ -10,7 +10,7 @@ export const useWaitlistRegistration = (courseName: string) => {
     if (!user) {
       setModalState(prev => ({ 
         ...prev, 
-        showLoginModal: true, 
+        showSignUpModal: true,
         loginModalTitle: 'Sign In/Up to Join the Waitlist' 
       }));
     } else {

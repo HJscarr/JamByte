@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import Notification from './Notification';
@@ -11,12 +11,14 @@ interface AuthComponentProps {
   showSignUpModal: boolean;
   setShowSignUpModal: (show: boolean) => void;
   title?: string;
+  defaultToSignUp?: boolean;
 }
 
 const UserAuth: React.FC<AuthComponentProps> = ({
   showLoginModal, setShowLoginModal,
   showSignUpModal, setShowSignUpModal,
-  title = 'Sign In'
+  title = 'Sign In',
+  defaultToSignUp = false
 }) => {
   const auth = useAuth();
   const { modalState, setModalState } = useAuth();
@@ -37,6 +39,14 @@ const UserAuth: React.FC<AuthComponentProps> = ({
   const [forgotPasswordNewPassword, setForgotPasswordNewPassword] = useState('');
   const [forgotPasswordError, setForgotPasswordError] = useState<string | null>(null);
   const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState<string | null>(null);
+
+  // Effect to handle defaultToSignUp
+  useEffect(() => {
+    if (defaultToSignUp && showLoginModal) {
+      setShowLoginModal(false);
+      setShowSignUpModal(true);
+    }
+  }, [defaultToSignUp, showLoginModal, setShowLoginModal, setShowSignUpModal]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,10 +118,11 @@ const UserAuth: React.FC<AuthComponentProps> = ({
     e.preventDefault();
     try {
       await auth.confirmSignUp(email, verificationCode);
+      // Automatically sign in after successful verification
+      await auth.signIn(email, password);
       setShowVerificationModal(false);
-      setShowLoginModal(true);
       setNotification({
-        message: 'Account verified successfully! Please sign in.',
+        message: 'Account verified and signed in successfully!',
         type: 'success'
       });
     } catch (error: any) {
@@ -304,7 +315,7 @@ const UserAuth: React.FC<AuthComponentProps> = ({
                 />
               </div>
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">{title}</h2>
             <form onSubmit={handleSignUp}>
               <div className="flex gap-4 mb-4">
                 <div className="w-1/2">
