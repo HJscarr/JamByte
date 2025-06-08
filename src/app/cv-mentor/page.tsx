@@ -28,7 +28,7 @@ export default function CVHelperPage() {
   };
 
   const handleLoginClick = () => {
-    setModalState(prev => ({ ...prev, showLoginModal: true, loginModalTitle: 'Sign In/Up to Analyse Your CV for Free' }));
+    setModalState(prev => ({ ...prev, showSignUpModal: true, loginModalTitle: 'Sign Up to Analyse Your CV for Free' }));
   };
 
   const showResults = analysis || formattedCV;

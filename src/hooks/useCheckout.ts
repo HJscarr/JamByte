@@ -30,11 +30,16 @@ interface CheckoutResponse {
 }
 
 export const useCheckout = () => {
-  const { user } = useAuth();
+  const { user, modalState, setModalState } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckout = async ({ priceId, successUrl, cancelUrl }: CheckoutConfig) => {
+    if (!user) {
+      setModalState(prev => ({ ...prev, showSignUpModal: true, loginModalTitle: 'Sign Up' }));
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -47,7 +52,7 @@ export const useCheckout = () => {
       // Track checkout initiation
       captureEvent('checkout_initiated', {
         priceId,
-        userId: user?.profile?.sub,
+        userId: user.profile.sub,
         course: priceId.includes('rover') ? 'Rover' : 
                priceId.includes('lens') ? 'Lens' : 
                priceId.includes('link') ? 'Link' : 'Unknown'
@@ -62,10 +67,10 @@ export const useCheckout = () => {
         successUrl,
         cancelUrl,
         // Include user information if available
-        email: user?.profile?.email,
-        firstName: user?.profile?.given_name,
-        lastName: user?.profile?.family_name,
-        phone: user?.profile?.phone
+        email: user.profile.email,
+        firstName: user.profile.given_name,
+        lastName: user.profile.family_name,
+        phone: user.profile.phone
       };
 
       const response = await fetch('https://qkibtbq1k5.execute-api.eu-west-1.amazonaws.com/stripe-checkout', {
